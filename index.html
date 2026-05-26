@@ -1,0 +1,1090 @@
+<!DOCTYPE html>  
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Smart Maintenance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;width:100%;overflow-x:hidden}
+body{font-family:'Sarabun',sans-serif;background:#F0F2F5;color:#1a1a1a;font-size:15px;min-height:100vh}
+:root{
+  --blue:#1976D2;--blue-dark:#1256A0;--blue-light:#E3F0FB;
+  --green:#2E7D32;--green-light:#E8F5E9;
+  --red:#C62828;--red-light:#FFEBEE;
+  --orange:#E65100;--orange-light:#FFF3E0;
+  --purple:#6A1B9A;--purple-light:#F3E5F5;
+  --teal:#00695C;--teal-light:#E0F2F1;
+  --gray:#757575;--border:#E0E0E0;--bg:#F0F2F5;
+  --white:#FFFFFF;--text:#1a1a1a;--muted:#616161
+}
+#app{width:100%;max-width:430px;margin:0 auto;min-height:100vh;position:relative;background:#F0F2F5}
+.page{display:none;flex-direction:column;min-height:100vh;padding-bottom:68px;background:#F0F2F5}
+.page.on{display:flex}
+.bar{background:var(--blue);color:#fff;height:52px;display:flex;align-items:center;padding:0 8px 0 4px;position:sticky;top:0;z-index:50}
+.bar-back{background:none;border:none;color:#fff;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px}
+.bar-back svg{width:22px;height:22px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.bar-title{flex:1;font-size:17px;font-weight:600;padding-left:4px}
+.bar-btn{background:none;border:none;color:#fff;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px}
+.bar-btn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-top:1px solid var(--border);display:flex;z-index:50;height:58px}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--gray);background:none;border:none;font-family:'Sarabun',sans-serif;font-size:10px;padding:6px 0}
+.nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav-item.on{color:var(--blue)}
+.body{padding:14px;flex:1}
+.card{background:#fff;border-radius:10px;margin-bottom:12px;overflow:hidden;border:1px solid var(--border)}
+.card-p{padding:14px}
+.sec{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500}
+.tag-new{background:var(--blue-light);color:var(--blue)}
+.tag-ok{background:var(--green-light);color:var(--green)}
+.tag-no{background:var(--red-light);color:var(--red)}
+.tag-acc{background:var(--orange-light);color:var(--orange)}
+.tag-wip{background:var(--purple-light);color:var(--purple)}
+.tag-done{background:var(--teal-light);color:var(--teal)}
+.u1{color:var(--red);font-weight:600}
+.u2{color:var(--orange);font-weight:600}
+.u3{color:#F9A825;font-weight:500}
+.u4{color:var(--green)}
+.fg{margin-bottom:13px}
+.fl{display:block;font-size:13px;font-weight:500;color:#424242;margin-bottom:5px}
+.req{color:var(--red);margin-left:2px}
+.fc{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:15px;font-family:'Sarabun',sans-serif;color:var(--text);background:#fff;outline:none;transition:border .15s}
+.fc:focus{border-color:var(--blue)}
+textarea.fc{resize:none;min-height:80px;line-height:1.5}
+select.fc{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23666' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 12px center;padding-right:36px}
+.fc[readonly]{background:#F5F5F5;color:var(--muted)}
+.btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:12px;border-radius:8px;font-size:15px;font-family:'Sarabun',sans-serif;font-weight:600;cursor:pointer;border:none;transition:opacity .15s}
+.btn:active{opacity:.8}
+.btn:disabled{opacity:.45;pointer-events:none}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-orange{background:var(--orange);color:#fff}
+.btn-ghost{background:#fff;color:var(--blue);border:1.5px solid var(--blue)}
+.btn-ghost-red{background:#fff;color:var(--red);border:1.5px solid var(--red)}
+.btn-gray{background:#EEEEEE;color:#424242}
+.btn-row{display:flex;gap:10px}
+.btn-row .btn{flex:1}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.scard{background:#fff;border-radius:10px;padding:12px 8px;text-align:center;border:1px solid var(--border);cursor:pointer}
+.scard:active{opacity:.7}
+.snum{font-size:28px;font-weight:700;line-height:1}
+.slbl{font-size:11px;color:var(--muted);margin-top:3px}
+.scard.s0 .snum{color:var(--blue)}
+.scard.s1 .snum{color:var(--green)}
+.scard.s2 .snum{color:var(--red)}
+.scard.s3 .snum{color:var(--orange)}
+.scard.s4 .snum{color:var(--purple)}
+.scard.s5 .snum{color:var(--teal)}
+.mgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.mitem{background:#fff;border-radius:10px;padding:16px 8px;display:flex;flex-direction:column;align-items:center;gap:7px;cursor:pointer;border:1px solid var(--border);font-family:'Sarabun',sans-serif}
+.mitem:active{background:#F5F5F5}
+.mitem svg{width:28px;height:28px;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;fill:none}
+.mitem span{font-size:11px;color:#424242;text-align:center}
+.ri{background:#fff;border-radius:10px;padding:14px;margin-bottom:9px;border:1px solid var(--border);border-left-width:4px;cursor:pointer}
+.ri:active{background:#FAFAFA}
+.ri-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.ri-id{font-size:13px;font-weight:600;color:var(--blue)}
+.ri-title{font-size:15px;font-weight:500;margin-bottom:5px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ri-meta{font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap}
+.dr{display:flex;padding:9px 0;border-bottom:1px solid #F5F5F5}
+.dr:last-child{border:none}
+.dk{width:120px;font-size:13px;color:var(--muted);flex-shrink:0}
+.dv{font-size:14px;flex:1;word-break:break-word}
+.crow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #F5F5F5;font-size:14px}
+.crow.tot{font-weight:700;font-size:16px;border:none;border-top:2px solid #E0E0E0;padding-top:10px;margin-top:4px}
+.srch{display:flex;align-items:center;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:8px 12px;gap:8px;margin-bottom:12px}
+.srch svg{width:18px;height:18px;stroke:var(--muted);fill:none;stroke-width:2;flex-shrink:0;stroke-linecap:round;stroke-linejoin:round}
+.srch input{flex:1;border:none;outline:none;font-size:14px;font-family:'Sarabun',sans-serif;color:var(--text);background:none}
+.tabs{display:flex;background:#fff;border-radius:8px;padding:3px;margin-bottom:12px;border:1px solid var(--border);gap:2px}
+.tab{flex:1;text-align:center;padding:7px 4px;border-radius:6px;font-size:12px;cursor:pointer;color:var(--muted);font-family:'Sarabun',sans-serif;border:none;background:none;font-weight:500}
+.tab.on{background:var(--blue);color:#fff}
+.img-area{border:2px dashed var(--border);border-radius:8px;padding:24px 16px;text-align:center;cursor:pointer;background:#FAFAFA}
+.img-area:hover{border-color:var(--blue)}
+.img-area svg{width:32px;height:32px;stroke:#BDBDBD;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round;margin:0 auto 8px;display:block}
+.img-area p{font-size:13px;color:var(--muted)}
+.img-area small{font-size:11px;color:#9E9E9E}
+.preview-img{width:100%;max-height:200px;object-fit:cover;border-radius:8px;margin-top:8px;display:block}
+.login-wrap{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:32px 20px;background:#fff;width:100%;max-width:430px;margin:0 auto}
+.login-logo{text-align:center;margin-bottom:32px}
+.login-logo svg{width:56px;height:56px;stroke:var(--blue);fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.login-logo h1{font-size:20px;font-weight:700;color:var(--blue);margin-top:10px}
+.login-logo p{font-size:13px;color:var(--muted);margin-top:4px}
+.pbanner{background:var(--blue);color:#fff;border-radius:10px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.pav{width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;flex-shrink:0}
+.pname{font-size:16px;font-weight:600}
+.prole{font-size:12px;opacity:.85;margin-top:2px}
+.alert{padding:11px 13px;border-radius:8px;font-size:14px;margin-bottom:12px;border-left:3px solid}
+.alert-info{background:var(--blue-light);color:var(--blue);border-color:var(--blue)}
+.alert-ok{background:var(--green-light);color:var(--green);border-color:var(--green)}
+.alert-err{background:var(--red-light);color:var(--red);border-color:var(--red)}
+.empty{display:flex;flex-direction:column;align-items:center;padding:48px 24px;color:var(--muted);gap:10px}
+.empty svg{width:48px;height:48px;stroke:#BDBDBD;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.uchip{display:flex;align-items:center;gap:10px;background:#fff;border-radius:10px;padding:12px 14px;margin-bottom:8px;border:1px solid var(--border);cursor:pointer}
+.uchip:active{background:#F5F5F5}
+.uav{width:38px;height:38px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex-shrink:0}
+#ld{position:fixed;inset:0;background:rgba(255,255,255,.88);display:none;align-items:center;justify-content:center;z-index:999;flex-direction:column;gap:12px}
+.spin{width:36px;height:36px;border:3px solid #E0E0E0;border-top-color:var(--blue);border-radius:50%;animation:sp .65s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+#ld p{font-size:14px;color:var(--muted)}
+#toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(10px);background:#212121;color:#fff;padding:10px 20px;border-radius:20px;font-size:14px;opacity:0;transition:all .25s;z-index:998;pointer-events:none;white-space:nowrap;max-width:calc(100vw - 40px);text-align:center}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#toast.ok{background:var(--green)}
+#toast.er{background:var(--red)}
+.divider{height:1px;background:var(--border);margin:12px 0}
+.mt8{margin-top:8px}
+.mt12{margin-top:12px}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- LOGIN -->
+<div class="login-wrap" id="pg-login">
+  <div class="login-logo">
+    <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+    <h1>SMART MAINTENANCE</h1>
+    <p>ระบบแจ้งซ่อมออนไลน์ ศูนย์วิจัยเพชรบุรี</p>
+  </div>
+  <div class="fg">
+    <label class="fl">Username</label>
+    <input id="lu" type="text" class="fc" placeholder="กรอก username" autocomplete="username">
+  </div>
+  <div class="fg">
+    <label class="fl">Password</label>
+    <div style="position:relative">
+      <input id="lp" type="password" class="fc" placeholder="กรอก password" style="padding-right:44px" autocomplete="current-password">
+      <button onclick="togglePw()" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;padding:4px" id="pw-eye">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9E9E9E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
+    </div>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+    <input type="checkbox" id="lr" style="width:16px;height:16px;cursor:pointer;accent-color:var(--blue)">
+    <label for="lr" style="font-size:14px;cursor:pointer;color:#424242">จดจำการเข้าสู่ระบบ</label>
+  </div>
+  <button class="btn btn-blue" onclick="doLogin()" id="btn-login">เข้าสู่ระบบ</button>
+  <div id="lerr" style="display:none" class="alert alert-err mt12"></div>
+</div>
+
+<!-- MAIN -->
+<div id="main" style="display:none">
+
+  <!-- DASHBOARD -->
+  <div class="page on" id="pg-dash">
+    <div class="bar">
+      <span style="width:44px;display:flex;align-items:center;justify-content:center">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+      </span>
+      <span class="bar-title">หน้าหลัก</span>
+      <button class="bar-btn" onclick="doLogout()">
+        <svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+      </button>
+    </div>
+    <div class="body">
+      <div class="pbanner">
+        <div class="pav" id="d-av">U</div>
+        <div>
+          <div class="pname" id="d-name">-</div>
+          <div class="prole" id="d-role">-</div>
+        </div>
+        <button onclick="go('pg-new')" style="margin-left:auto;background:rgba(255,255,255,.2);border:none;border-radius:8px;color:#fff;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Sarabun',sans-serif">+ แจ้งซ่อม</button>
+      </div>
+      <div class="sec">สรุปสถานะงาน</div>
+      <div class="sgrid">
+        <div class="scard s0" onclick="goFilter('แจ้งซ่อม')"><div class="snum" id="s0">-</div><div class="slbl">แจ้งซ่อม</div></div>
+        <div class="scard s1" onclick="goFilter('อนุมัติ')"><div class="snum" id="s1">-</div><div class="slbl">อนุมัติ</div></div>
+        <div class="scard s2" onclick="goFilter('ไม่อนุมัติ')"><div class="snum" id="s2">-</div><div class="slbl">ไม่อนุมัติ</div></div>
+        <div class="scard s3" onclick="goFilter('ช่างรับงาน')"><div class="snum" id="s3">-</div><div class="slbl">รับงาน</div></div>
+        <div class="scard s4" onclick="goFilter('กำลังดำเนินการ')"><div class="snum" id="s4">-</div><div class="slbl">ดำเนินการ</div></div>
+        <div class="scard s5" onclick="goFilter('เสร็จสิ้น')"><div class="snum" id="s5">-</div><div class="slbl">เสร็จสิ้น</div></div>
+      </div>
+      <div class="sec">เมนู</div>
+      <div class="mgrid">
+        <button class="mitem" onclick="go('pg-new')">
+          <svg viewBox="0 0 24 24" stroke="var(--blue)"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+          <span>แจ้งซ่อม</span>
+        </button>
+        <button class="mitem" onclick="go('pg-all')">
+          <svg viewBox="0 0 24 24" stroke="var(--teal)"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+          <span>งานทั้งหมด</span>
+        </button>
+        <button class="mitem" onclick="go('pg-mine')">
+          <svg viewBox="0 0 24 24" stroke="var(--purple)"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>งานของฉัน</span>
+        </button>
+        <button class="mitem" id="m-apv" onclick="go('pg-apv')" style="display:none">
+          <svg viewBox="0 0 24 24" stroke="var(--green)"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+          <span>รออนุมัติ</span>
+        </button>
+        <button class="mitem" id="m-acc" onclick="go('pg-acc')" style="display:none">
+          <svg viewBox="0 0 24 24" stroke="var(--orange)"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          <span>รอรับงาน</span>
+        </button>
+        <button class="mitem" id="m-wip" onclick="go('pg-wip')" style="display:none">
+          <svg viewBox="0 0 24 24" stroke="var(--orange)"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M17.66 17.66l-1.41-1.41M6.34 17.66l1.41-1.41"/></svg>
+          <span>กำลังซ่อม</span>
+        </button>
+        <button class="mitem" onclick="go('pg-rpt')">
+          <svg viewBox="0 0 24 24" stroke="var(--blue)"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <span>รายงาน</span>
+        </button>
+        <button class="mitem" id="m-usr" onclick="go('pg-usr')" style="display:none">
+          <svg viewBox="0 0 24 24" stroke="var(--blue)"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+          <span>ผู้ใช้งาน</span>
+        </button>
+        <button class="mitem" id="m-set" onclick="go('pg-set')" style="display:none">
+          <svg viewBox="0 0 24 24" stroke="var(--gray)"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M17.66 17.66l-1.41-1.41M6.34 17.66l1.41-1.41"/></svg>
+          <span>ตั้งค่า</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- NEW REQUEST -->
+  <div class="page" id="pg-new">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">แจ้งซ่อมใหม่</span></div>
+    <div class="body">
+      <div class="fg"><label class="fl">ผู้แจ้ง</label><input id="r-who" type="text" class="fc" readonly></div>
+      <div class="fg"><label class="fl">หน่วยงาน <span class="req">*</span></label><select id="r-dept" class="fc"></select></div>
+      <div class="fg"><label class="fl">ประเภทการแจ้ง <span class="req">*</span></label><select id="r-type" class="fc"></select></div>
+      <div class="fg"><label class="fl">วันที่และเวลาเข้าซ่อมได้ <span class="req">*</span></label><input id="r-avail" type="datetime-local" class="fc"></div>
+      <div class="fg"><label class="fl">วันที่และเวลาต้องการให้เสร็จ <span class="req">*</span></label><input id="r-end" type="datetime-local" class="fc"></div>
+      <div class="fg"><label class="fl">หมวดหมู่งาน <span class="req">*</span></label><select id="r-cat" class="fc"></select></div>
+      <div class="fg"><label class="fl">สถานะเครื่องจักร <span class="req">*</span></label><select id="r-mach" class="fc"></select></div>
+      <div class="fg"><label class="fl">รายละเอียด / สถานที่ <span class="req">*</span></label><textarea id="r-det" class="fc" placeholder="อธิบายปัญหาและสถานที่"></textarea></div>
+      <div class="fg">
+        <label class="fl">รูปภาพ <span class="req">*</span></label>
+        <div class="img-area" id="img-box" onclick="document.getElementById('img-in').click()">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <p>แตะเพื่อเลือกรูป</p>
+          <small>JPG, PNG (ระบบ resize อัตโนมัติ)</small>
+        </div>
+        <input type="file" id="img-in" accept="image/*" style="display:none" onchange="prevImg(event)">
+        <div id="img-preview-wrap" style="display:none;position:relative;margin-top:8px">
+          <img id="img-prev" class="preview-img">
+          <button onclick="removeImg()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:32px;height:32px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+          <button onclick="document.getElementById('img-in').click()" style="position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,0.6);border:none;border-radius:20px;color:#fff;font-size:12px;padding:5px 12px;cursor:pointer">เปลี่ยนรูป</button>
+        </div>
+        <div id="img-up" style="display:none;text-align:center;padding:10px;font-size:13px;color:var(--muted)">
+          <div style="width:20px;height:20px;border:2px solid #E0E0E0;border-top-color:var(--blue);border-radius:50%;animation:sp .65s linear infinite;margin:0 auto 6px"></div>
+          กำลัง resize และอัปโหลด...
+        </div>
+        <input type="hidden" id="r-img">
+      </div>
+      <div class="fg"><label class="fl">ระดับความเร่งด่วน <span class="req">*</span></label><select id="r-urg" class="fc"></select></div>
+      <div class="btn-row mt12">
+        <button class="btn btn-gray" onclick="clearForm()">ล้างข้อมูล</button>
+        <button class="btn btn-blue" onclick="submitReq()" id="btn-sr">ส่งข้อมูล</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ALL REQUESTS -->
+  <div class="page" id="pg-all">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">งานทั้งหมด</span><button class="bar-btn" onclick="loadAll()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button></div>
+    <div class="body">
+      <div class="srch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="sch-all" placeholder="ค้นหาเลขงาน หรือปัญหา..." oninput="filterAll()"></div>
+      <div class="tabs" id="tabs-all">
+        <button class="tab on" onclick="setTab('all',this,'tabs-all')">ทั้งหมด</button>
+        <button class="tab" onclick="setTab('แจ้งซ่อม',this,'tabs-all')">แจ้งซ่อม</button>
+        <button class="tab" onclick="setTab('อนุมัติ',this,'tabs-all')">อนุมัติ</button>
+        <button class="tab" onclick="setTab('เสร็จสิ้น',this,'tabs-all')">เสร็จสิ้น</button>
+      </div>
+      <div id="ls-all"></div>
+    </div>
+  </div>
+
+  <!-- MY REQUESTS -->
+  <div class="page" id="pg-mine">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">งานของฉัน</span><button class="bar-btn" onclick="loadMine()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button></div>
+    <div class="body"><div id="ls-mine"></div></div>
+  </div>
+
+  <!-- PENDING APPROVAL -->
+  <div class="page" id="pg-apv">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">งานรออนุมัติ</span><button class="bar-btn" onclick="loadApv()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button></div>
+    <div class="body"><div id="ls-apv"></div></div>
+  </div>
+
+  <!-- PENDING ACCEPT -->
+  <div class="page" id="pg-acc">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">งานรอรับ</span><button class="bar-btn" onclick="loadAcc()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button></div>
+    <div class="body"><div id="ls-acc"></div></div>
+  </div>
+
+  <!-- IN PROGRESS -->
+  <div class="page" id="pg-wip">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">กำลังดำเนินการ</span><button class="bar-btn" onclick="loadWip()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button></div>
+    <div class="body"><div id="ls-wip"></div></div>
+  </div>
+
+  <!-- DETAIL -->
+  <div class="page" id="pg-det">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title" id="det-title">รายละเอียด</span></div>
+    <div class="body" id="det-body"></div>
+  </div>
+
+  <!-- CLOSE JOB -->
+  <div class="page" id="pg-close">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">ปิดงาน</span></div>
+    <div class="body">
+      <div class="alert alert-info" id="cl-id"></div>
+      <div class="fg"><label class="fl">รายละเอียดการซ่อม <span class="req">*</span></label><textarea id="cl-det" class="fc" rows="3" placeholder="อธิบายวิธีซ่อม / อะไหล่ที่ใช้"></textarea></div>
+      <div class="sec">ค่าใช้จ่าย</div>
+      <div class="fg"><label class="fl">ค่าอะไหล่ (บาท)</label><input type="number" id="cl-p" class="fc" value="0" min="0" oninput="calcCost()"></div>
+      <div class="fg"><label class="fl">ค่าแรง (บาท)</label><input type="number" id="cl-l" class="fc" value="0" min="0" oninput="calcCost()"></div>
+      <div class="fg"><label class="fl">ค่าอื่นๆ (บาท)</label><input type="number" id="cl-o" class="fc" value="0" min="0" oninput="calcCost()"></div>
+      <div class="card"><div class="card-p">
+        <div class="crow"><span>ค่าอะไหล่</span><span id="cp">0.00</span></div>
+        <div class="crow"><span>ค่าแรง</span><span id="cl">0.00</span></div>
+        <div class="crow"><span>ค่าอื่นๆ</span><span id="co">0.00</span></div>
+        <div class="crow tot"><span>รวม</span><span id="ct" style="color:var(--blue)">0.00 บาท</span></div>
+      </div></div>
+      <div class="fg mt8"><label class="fl">หมายเหตุ</label><textarea id="cl-rem" class="fc" rows="2" placeholder="หมายเหตุ (ถ้ามี)"></textarea></div>
+          
+          <div class="fg">
+            <label class="fl">รูปภาพหลังซ่อม</label>
+            <div class="img-area" id="cl-img-box" onclick="document.getElementById('cl-img-in').click()">
+              <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <p>แตะเพื่อเลือกรูป</p>
+              <small>JPG, PNG (ระบบ resize อัตโนมัติ)</small>
+            </div>
+            <input type="file" id="cl-img-in" accept="image/*" style="display:none" onchange="prevCloseImg(event)">
+            <div id="cl-img-preview-wrap" style="display:none;position:relative;margin-top:8px">
+              <img id="cl-img-prev" class="preview-img">
+              <button onclick="removeCloseImg()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:32px;height:32px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+            </div>
+            <div id="cl-img-up" style="display:none;text-align:center;padding:10px;font-size:13px;color:var(--muted)">
+              <div style="width:20px;height:20px;border:2px solid #E0E0E0;border-top-color:var(--blue);border-radius:50%;animation:sp .65s linear infinite;margin:0 auto 6px"></div>
+              กำลังอัปโหลด...
+            </div>
+            <input type="hidden" id="cl-img">
+          </div>
+
+          <div class="fg">
+            <label class="fl">ให้คะแนนการซ่อม</label>
+            <div style="display:flex;gap:8px;justify-content:center;padding:8px 0" id="star-rating">
+              <span onclick="setRating(1)" style="font-size:32px;cursor:pointer" data-star="1">⭐</span>
+              <span onclick="setRating(2)" style="font-size:32px;cursor:pointer" data-star="2">⭐</span>
+              <span onclick="setRating(3)" style="font-size:32px;cursor:pointer" data-star="3">⭐</span>
+              <span onclick="setRating(4)" style="font-size:32px;cursor:pointer" data-star="4">⭐</span>
+              <span onclick="setRating(5)" style="font-size:32px;cursor:pointer" data-star="5">⭐</span>
+            </div>
+            <div id="rating-label" style="text-align:center;font-size:13px;color:var(--muted)">ยังไม่ได้ให้คะแนน</div>
+            <input type="hidden" id="cl-rating" value="0">
+          </div>
+
+          <input type="hidden" id="cl-rid">
+          <button class="btn btn-green mt12" onclick="submitClose()" id="btn-cl">ปิดงาน</button>
+    </div>
+  </div>
+
+  <!-- REPORT -->
+  <div class="page" id="pg-rpt">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">รายงาน</span></div>
+    <div class="body">
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <select id="rpt-m" class="fc" style="flex:1">
+          <option value="">ทุกเดือน</option>
+          <option value="1">มกราคม</option><option value="2">กุมภาพันธ์</option><option value="3">มีนาคม</option>
+          <option value="4">เมษายน</option><option value="5">พฤษภาคม</option><option value="6">มิถุนายน</option>
+          <option value="7">กรกฎาคม</option><option value="8">สิงหาคม</option><option value="9">กันยายน</option>
+          <option value="10">ตุลาคม</option><option value="11">พฤศจิกายน</option><option value="12">ธันวาคม</option>
+        </select>
+        <select id="rpt-y" class="fc" style="width:90px"></select>
+        <button class="btn btn-blue" style="width:auto;padding:10px 14px" onclick="loadRpt()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        </button>
+      </div>
+      <div class="tabs" id="tabs-rpt">
+        <button class="tab on" onclick="setTab('all',this,'tabs-rpt');loadRpt()">ทั้งหมด</button>
+        <button class="tab" onclick="setTab('pending',this,'tabs-rpt');loadRpt()">ค้าง</button>
+        <button class="tab" onclick="setTab('done',this,'tabs-rpt');loadRpt()">เสร็จ</button>
+        <button class="tab" onclick="setTab('cost',this,'tabs-rpt');loadRpt()">ค่าใช้จ่าย</button>
+      </div>
+      <div id="rpt-sum" style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px"></div>
+      <div id="rpt-ls"></div>
+    </div>
+  </div>
+
+  <!-- ADMIN USERS -->
+  <div class="page" id="pg-usr">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">จัดการผู้ใช้</span><button class="bar-btn" onclick="go('pg-uf');initUF()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></div>
+    <div class="body">
+      <div class="srch"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" id="sch-usr" placeholder="ค้นหาผู้ใช้..." oninput="filterUsr()"></div>
+      <div id="ls-usr"></div>
+    </div>
+  </div>
+
+  <!-- USER FORM -->
+  <div class="page" id="pg-uf">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title" id="uf-title">เพิ่มผู้ใช้</span></div>
+    <div class="body">
+      <input type="hidden" id="uf-id">
+      <div class="fg"><label class="fl">Username <span class="req">*</span></label><input type="text" id="uf-un" class="fc"></div>
+      <div class="fg"><label class="fl">Password <span class="req">*</span></label><input type="password" id="uf-pw" class="fc" placeholder="เว้นว่างถ้าไม่เปลี่ยน"></div>
+      <div class="fg"><label class="fl">ชื่อ-นามสกุล <span class="req">*</span></label><input type="text" id="uf-fn" class="fc"></div>
+      <div class="fg"><label class="fl">หน่วยงาน <span class="req">*</span></label><select id="uf-dp" class="fc"></select></div>
+      <div class="fg">
+        <label class="fl">สิทธิ์ <span class="req">*</span></label>
+        <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:4px" id="uf-roles">
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer"><input type="checkbox" value="User" style="accent-color:var(--blue)"> User</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer"><input type="checkbox" value="Approver" style="accent-color:var(--blue)"> Approver</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer"><input type="checkbox" value="Technician" style="accent-color:var(--blue)"> Technician</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:14px;cursor:pointer"><input type="checkbox" value="Admin" style="accent-color:var(--blue)"> Admin</label>
+        </div>
+      </div>
+      <div class="fg"><label class="fl">Telegram ID</label><input type="text" id="uf-tg" class="fc" placeholder="เช่น 123456789"></div>
+      <div class="fg"><label class="fl">สถานะ</label><select id="uf-st" class="fc"><option value="Active">Active</option><option value="Inactive">Inactive</option></select></div>
+      <button class="btn btn-blue" onclick="submitUF()" id="btn-uf">บันทึก</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="page" id="pg-set">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">ตั้งค่าระบบ</span></div>
+    <div class="body">
+      <div class="fg"><label class="fl">ชื่อระบบ</label><input type="text" id="set-nm" class="fc"></div>
+      <div class="fg"><label class="fl">URL ระบบ</label><input type="text" id="set-url" class="fc"></div>
+      <div class="sec">Telegram</div>
+      <div class="fg"><label class="fl">Bot Token</label><input type="text" id="set-tk" class="fc"></div>
+      <div class="fg"><label class="fl">Group ID</label><input type="text" id="set-gid" class="fc"></div>
+      <div class="fg"><label class="fl">Google Drive Folder ID</label><input type="text" id="set-drv" class="fc"></div>
+      <button class="btn btn-blue" onclick="saveSets()">บันทึกการตั้งค่า</button>
+      <div class="divider"></div>
+      <div class="alert alert-err">⚠️ ล้างข้อมูลฟอร์มทั้งหมด — ไม่สามารถกู้คืนได้</div>
+      <button class="btn btn-ghost-red" onclick="clearAll()">ล้างข้อมูลฟอร์มทั้งหมด</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="nav" id="bnav">
+    <button class="nav-item on" onclick="go('pg-dash',this)">
+      <svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>หน้าหลัก</span>
+    </button>
+    <button class="nav-item" onclick="go('pg-new',this)">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span>แจ้งซ่อม</span>
+    </button>
+    <button class="nav-item" onclick="go('pg-all',this)">
+      <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      <span>งานทั้งหมด</span>
+    </button>
+    <button class="nav-item" onclick="go('pg-rpt',this)">
+      <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <span>รายงาน</span>
+    </button>
+    <button class="nav-item" onclick="go('pg-mine',this)">
+      <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>ของฉัน</span>
+    </button>
+  </nav>
+
+</div><!-- /main -->
+</div><!-- /app -->
+
+<div id="ld"><div class="spin"></div><p id="ld-txt">กำลังโหลด...</p></div>
+<div id="toast"></div>
+
+<script>
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbxx6lO5bvztiHA-CI1bzu2jovtvoWecaQo1r5nVXsU0ZHcHLxBToexd1yfNFQTePxM/exec';
+
+let sess=null, master={}, allData=[], allTab='all', rptTab='all', allUsrs=[], hist=[];
+
+async function api(p){
+  if(sess?.token) p.token=sess.token;
+  const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(p)});
+  return r.json();
+}
+
+const ld=(m='กำลังโหลด...')=>{document.getElementById('ld-txt').textContent=m;document.getElementById('ld').style.display='flex'};
+const ul=()=>document.getElementById('ld').style.display='none';
+function toast(m,t=''){
+  const e=document.getElementById('toast');
+  e.textContent=m; e.className='on'+(t?' '+t:'');
+  setTimeout(()=>e.className='',3000);
+}
+const $=id=>document.getElementById(id);
+
+function go(id,navEl){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  $(id).classList.add('on');
+  if(id==='pg-dash') hist=[];
+  else if(hist[hist.length-1]!==id) hist.push(id);
+  if(navEl){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('on'));navEl.classList.add('on');}
+  const noNav=['pg-new','pg-det','pg-close','pg-uf','pg-set'];
+$('bnav').style.display = noNav.includes(id)?'none':'flex';
+  if(id==='pg-dash') loadDash();
+  if(id==='pg-all') loadAll();
+  if(id==='pg-mine') loadMine();
+  if(id==='pg-apv') loadApv();
+  if(id==='pg-acc') loadAcc();
+  if(id==='pg-wip') loadWip();
+  if(id==='pg-usr') loadUsr();
+  if(id==='pg-set') loadSet();
+  if(id==='pg-rpt') initRpt();
+  if(id==='pg-new') initNewForm();
+}
+function back(){
+  hist.pop();
+  const prev=hist[hist.length-1]||'pg-dash';
+  if(prev==='pg-dash') hist=[];
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  $(prev).classList.add('on');
+  const noNav=['pg-new','pg-det','pg-close','pg-uf','pg-set'];
+$('bnav').style.display = noNav.includes(prev)?'none':'flex';
+  if(prev==='pg-dash') loadDash();
+}
+function goFilter(s){allTab=s;go('pg-all');}
+
+function togglePw(){
+  const i=$('lp');
+  i.type=i.type==='password'?'text':'password';
+}
+async function doLogin(){
+  const u=$('lu').value.trim(),p=$('lp').value;
+  $('lerr').style.display='none';
+  if(!u||!p){$('lerr').textContent='กรุณากรอก username และ password';$('lerr').style.display='block';return;}
+  $('btn-login').disabled=true; $('btn-login').textContent='กำลังเข้าสู่ระบบ...';
+  try{
+    const r=await api({action:'login',username:u,password:p});
+    if(r.success){
+      sess=r; localStorage.setItem('sm_s',JSON.stringify(sess));
+      startApp();
+    }else{
+      $('lerr').textContent=r.message; $('lerr').style.display='block';
+    }
+  }catch(e){$('lerr').textContent='ไม่สามารถเชื่อมต่อได้';$('lerr').style.display='block';}
+  finally{$('btn-login').disabled=false;$('btn-login').textContent='เข้าสู่ระบบ';}
+}
+function doLogout(){if(!confirm('ออกจากระบบ?'))return;sess=null;localStorage.removeItem('sm_s');location.reload();}
+function checkSess(){const s=localStorage.getItem('sm_s');if(s){sess=JSON.parse(s);startApp();}}
+function startApp(){
+  $('pg-login').style.display='none';
+  $('main').style.display='block';
+  setupMenus();
+  loadMaster();
+  go('pg-dash');
+}
+function hasRole(r){return sess?.user?.roles?.includes(r);}
+function setupMenus(){
+  const apv=hasRole('Approver')||hasRole('Admin');
+  const tec=hasRole('Technician')||hasRole('Admin');
+  const adm=hasRole('Admin');
+  $('m-apv').style.display=apv?'flex':'none';
+  $('m-acc').style.display=tec?'flex':'none';
+  $('m-wip').style.display=tec?'flex':'none';
+  $('m-usr').style.display=adm?'flex':'none';
+  $('m-set').style.display=adm?'flex':'none';
+}
+
+async function loadMaster(retry=0){
+  try{
+    const r=await api({action:'getMasterData'});
+    if(r.success && r.data && Object.keys(r.data).length>0){
+      master=r.data; fillMaster(); return true;
+    } else if(retry<3){
+      await new Promise(res=>setTimeout(res,1500));
+      return loadMaster(retry+1);
+    }
+  }catch(e){
+    if(retry<3){await new Promise(res=>setTimeout(res,2000));return loadMaster(retry+1);}
+  }
+  return false;
+}
+function fillSel(id,type){
+  const el=$(id); if(!el)return;
+  const items=master[type]||[];
+  if(items.length===0) return;
+  el.innerHTML='<option value="">-- เลือก --</option>'+items.map(m=>`<option value="${m.value}">${m.display_text||m.value}</option>`).join('');
+}
+function fillMaster(){
+  setTimeout(()=>{
+    fillSel('r-dept','department'); fillSel('uf-dp','department');
+    fillSel('r-type','request_type'); fillSel('r-cat','work_category');
+    fillSel('r-mach','machine_status'); fillSel('r-urg','urgency');
+  },50);
+}
+
+async function loadDash(){
+  const u=sess.user;
+  $('d-name').textContent=u.full_name;
+  $('d-role').textContent='สิทธิ์: '+(Array.isArray(u.roles)?u.roles.join(', '):u.roles);
+  $('d-av').textContent=u.full_name?u.full_name.charAt(0).toUpperCase():'U';
+  try{const r=await api({action:'getDashboardStats'});
+    if(r.success){const s=r.data;
+      $('s0').textContent=s.new||0; $('s1').textContent=s.approved||0; $('s2').textContent=s.rejected||0;
+      $('s3').textContent=s.accepted||0; $('s4').textContent=s.in_progress||0; $('s5').textContent=s.done||0;
+    }
+  }catch(e){}
+}
+
+const TAGS={'แจ้งซ่อม':'tag-new','อนุมัติ':'tag-ok','ไม่อนุมัติ':'tag-no','ช่างรับงาน':'tag-acc','กำลังดำเนินการ':'tag-wip','เสร็จสิ้น':'tag-done'};
+const LCOLOR={'แจ้งซ่อม':'#1976D2','อนุมัติ':'#2E7D32','ไม่อนุมัติ':'#C62828','ช่างรับงาน':'#E65100','กำลังดำเนินการ':'#6A1B9A','เสร็จสิ้น':'#00695C'};
+const UCLS={'สูงมาก':'u1','สูง':'u2','ปานกลาง':'u3','ต่ำ':'u4'};
+function fdate(d){if(!d)return'-';return new Date(d).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});}
+function fdatetime(d){if(!d)return'-';const dt=new Date(d);return dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'})+' '+dt.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}
+
+function renderList(cid,data){
+  const el=$(cid);
+  if(!data?.length){el.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg><p>ไม่มีข้อมูล</p></div>`;return;}
+  el.innerHTML=data.map(r=>{
+    const statusOrder=['แจ้งซ่อม','อนุมัติ','ช่างรับงาน','กำลังดำเนินการ','เสร็จสิ้น'];
+    const icons=['📋','✅','👷','🔧','🏁'];
+    const colors={'แจ้งซ่อม':'#1976D2','อนุมัติ':'#2E7D32','ช่างรับงาน':'#E65100','กำลังดำเนินการ':'#6A1B9A','เสร็จสิ้น':'#00695C'};
+    const curIdx=statusOrder.indexOf(r.current_status);
+    const flowHtml=statusOrder.map((s,i,arr)=>`
+      <div style="display:flex;align-items:center">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:2px">
+          <div style="width:32px;height:32px;border-radius:50%;background:${i<=curIdx?colors[s]:'#E0E0E0'};display:flex;align-items:center;justify-content:center;font-size:14px;${i===curIdx?'box-shadow:0 0 0 3px '+colors[s]+'40':''}">
+            ${icons[i]}
+          </div>
+          <span style="font-size:9px;color:${i<=curIdx?colors[s]:'#9E9E9E'};font-weight:${i===curIdx?'700':'400'};text-align:center;width:44px">${s}</span>
+        </div>
+        ${i<arr.length-1?`<div style="width:14px;height:2px;background:${i<curIdx?colors[arr[i+1]]:'#E0E0E0'};margin-bottom:18px;flex-shrink:0"></div>`:''}
+      </div>`).join('');
+    const rating=r.rating_score?`<div style="font-size:11px;color:var(--orange);font-weight:600;margin-top:6px">คะแนนการซ่อม: ${'⭐'.repeat(+r.rating_score)} (${r.rating_score}/5)</div>`:'';
+    return `
+    <div class="ri" style="border-left-color:${LCOLOR[r.current_status]||'#BDBDBD'}" onclick="openDet('${r.request_id}')">
+      <div class="ri-top"><span class="ri-id">${r.request_id}</span><span class="tag ${TAGS[r.current_status]||'tag-new'}">${r.current_status}</span></div>
+      <div class="ri-title">${r.work_category} — ${r.request_type}</div>
+      <div class="ri-meta"><span>${r.department}</span><span>${fdate(r.created_at)}</span><span class="${UCLS[r.urgency]||''}">${r.urgency}</span></div>
+      <div style="display:flex;align-items:center;justify-content:center;margin-top:10px;overflow-x:auto;padding:4px 0">
+        ${flowHtml}
+      </div>
+      ${rating}
+    </div>`;
+  }).join('');
+}
+
+async function loadAll(){ld();try{const r=await api({action:'getAllRequests'});if(r.success){allData=r.data;renderFilteredAll();}}catch(e){toast('โหลดล้มเหลว','er');}finally{ul();}}
+async function loadMine(){ld();try{const r=await api({action:'getMyRequests'});if(r.success)renderList('ls-mine',r.data);}catch(e){}finally{ul();}}
+async function loadApv(){ld();try{const r=await api({action:'getPendingApproval'});if(r.success)renderList('ls-apv',r.data);else toast(r.message,'er');}catch(e){}finally{ul();}}
+async function loadAcc(){ld();try{const r=await api({action:'getPendingAccept'});if(r.success)renderList('ls-acc',r.data);}catch(e){}finally{ul();}}
+async function loadWip(){ld();try{const r=await api({action:'getInProgress'});if(r.success)renderList('ls-wip',r.data);}catch(e){}finally{ul();}}
+
+function setTab(v,el,gid){
+  if(gid==='tabs-all')allTab=v; else rptTab=v;
+  document.querySelectorAll('#'+gid+' .tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  if(gid==='tabs-all')renderFilteredAll();
+}
+function filterAll(){renderFilteredAll();}
+function renderFilteredAll(){
+  const q=($('sch-all').value||'').toLowerCase();
+  let d=allTab==='all'?allData:allData.filter(r=>r.current_status===allTab);
+  if(q)d=d.filter(r=>r.request_id.toLowerCase().includes(q)||r.problem_detail.toLowerCase().includes(q)||r.work_category.toLowerCase().includes(q));
+  renderList('ls-all',d);
+}
+
+async function openDet(id){
+  ld('กำลังโหลด...');
+  try{const r=await api({action:'getRequestById',request_id:id});
+    if(!r.success){toast(r.message,'er');return;}
+    renderDet(r.data); go('pg-det');
+  }catch(e){toast('โหลดล้มเหลว','er');}finally{ul();}
+}
+function renderDet(r){
+  $('det-title').textContent=r.request_id;
+  const apv=hasRole('Approver')||hasRole('Admin');
+  const tec=hasRole('Technician')||hasRole('Admin');
+  const canApv=apv&&r.current_status==='แจ้งซ่อม';
+  const canAcc=tec&&r.current_status==='อนุมัติ';
+  const canStart=tec&&r.current_status==='ช่างรับงาน';
+  const canClose=tec&&(r.current_status==='กำลังดำเนินการ'||r.current_status==='ช่างรับงาน');
+
+  let act='';
+  if(canApv) act=`<div class="btn-row mt12"><button class="btn btn-ghost-red" onclick="doReject('${r.request_id}')">ไม่อนุมัติ</button><button class="btn btn-green" onclick="doApprove('${r.request_id}')">อนุมัติ</button></div>`;
+  if(canAcc)  act+=`<button class="btn btn-blue mt12" onclick="doAccept('${r.request_id}')">รับงาน</button>`;
+  if(canStart) act+=`<button class="btn btn-orange mt12" onclick="doStart('${r.request_id}')">เริ่มดำเนินการ</button>`;
+  if(canClose) act+=`<button class="btn btn-green mt12" onclick="gotoClose('${r.request_id}')">ปิดงาน</button>`;
+
+  const img=r.image_url?`<img src="${driveImg(r.image_url)}" class="preview-img" style="margin-bottom:12px" onerror="this.style.display='none'">`:'';
+
+  const cost=r.current_status==='เสร็จสิ้น'?`
+    <div class="card"><div class="card-p">
+      <div class="sec" style="margin-bottom:10px">ค่าใช้จ่าย</div>
+      <div class="crow"><span>ค่าอะไหล่</span><span>${(+r.cost_part||0).toLocaleString()} บาท</span></div>
+      <div class="crow"><span>ค่าแรง</span><span>${(+r.cost_labor||0).toLocaleString()} บาท</span></div>
+      <div class="crow"><span>ค่าอื่นๆ</span><span>${(+r.cost_other||0).toLocaleString()} บาท</span></div>
+      <div class="crow tot"><span>รวม</span><span style="color:var(--blue)">${(+r.total_cost||0).toLocaleString()} บาท</span></div>
+    </div></div>`:'';
+
+ $('det-body').innerHTML=`
+    <div class="card"><div class="card-p">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <span class="tag ${TAGS[r.current_status]||'tag-new'}" style="font-size:14px;padding:5px 14px">${r.current_status}</span>
+        <span class="${UCLS[r.urgency]||''}" style="font-size:13px">${r.urgency}</span>
+      </div>
+
+      <!-- Flow Work -->
+      <div style="display:flex;align-items:center;justify-content:center;margin-bottom:16px;overflow-x:auto;padding:8px 0">
+        ${['แจ้งซ่อม','อนุมัติ','ช่างรับงาน','กำลังดำเนินการ','เสร็จสิ้น'].map((s,i,arr)=>{
+          const icons=['📋','✅','👷','🔧','🏁'];
+          const colors={'แจ้งซ่อม':'#1976D2','อนุมัติ':'#2E7D32','ช่างรับงาน':'#E65100','กำลังดำเนินการ':'#6A1B9A','เสร็จสิ้น':'#00695C'};
+          const statusOrder=['แจ้งซ่อม','อนุมัติ','ช่างรับงาน','กำลังดำเนินการ','เสร็จสิ้น'];
+          const curIdx=statusOrder.indexOf(r.current_status);
+          const isDone=i<=curIdx;
+          const isCur=i===curIdx;
+          return `<div style="display:flex;align-items:center">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+              <div style="width:40px;height:40px;border-radius:50%;background:${isDone?colors[s]:'#E0E0E0'};display:flex;align-items:center;justify-content:center;font-size:18px;${isCur?'box-shadow:0 0 0 3px '+colors[s]+'40':''}">
+                ${icons[i]}
+              </div>
+              <span style="font-size:10px;color:${isDone?colors[s]:'#9E9E9E'};font-weight:${isCur?'700':'400'};text-align:center;width:52px">${s}</span>
+            </div>
+            ${i<arr.length-1?`<div style="width:20px;height:2px;background:${i<curIdx?colors[arr[i+1]]:'#E0E0E0'};margin-bottom:20px;flex-shrink:0"></div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+
+      ${r.rating_score?`<div style="text-align:center;margin-bottom:12px;font-size:13px;color:var(--orange);font-weight:600">คะแนนการซ่อม: ${'⭐'.repeat(+r.rating_score)} (${r.rating_score}/5)</div>`:''}
+
+      ${img}
+      <div class="dr"><span class="dk">ผู้แจ้ง</span><span class="dv">${r.requester_name}</span></div>
+      <div class="dr"><span class="dk">หน่วยงาน</span><span class="dv">${r.department}</span></div>
+      <div class="dr"><span class="dk">ประเภท</span><span class="dv">${r.request_type}</span></div>
+      <div class="dr"><span class="dk">หมวดหมู่</span><span class="dv">${r.work_category}</span></div>
+      <div class="dr"><span class="dk">วันที่แจ้ง</span><span class="dv">${fdatetime(r.created_at)}</span></div>
+      <div class="dr"><span class="dk">เข้าซ่อมได้</span><span class="dv">${fdate(r.available_repair_date)}</span></div>
+      <div class="dr"><span class="dk">ต้องเสร็จ</span><span class="dv">${fdate(r.required_finish_date)}</span></div>
+      <div class="dr"><span class="dk">สถานะเครื่อง</span><span class="dv">${r.machine_status}</span></div>
+      <div class="dr"><span class="dk">รายละเอียด</span><span class="dv" style="white-space:pre-wrap">${r.problem_detail}</span></div>
+      ${r.approved_by?`<div class="dr"><span class="dk">อนุมัติโดย</span><span class="dv">${r.approved_by} (${fdate(r.approved_at)})</span></div>`:''}
+      ${r.rejected_by?`<div class="dr"><span class="dk">ไม่อนุมัติโดย</span><span class="dv" style="color:var(--red)">${r.rejected_by}<br>${r.remark||''}</span></div>`:''}
+      ${r.assigned_to?`<div class="dr"><span class="dk">ช่างรับงาน</span><span class="dv">${r.assigned_to} (${fdate(r.accepted_at)})</span></div>`:''}
+      ${r.repair_detail?`<div class="dr"><span class="dk">วิธีซ่อม</span><span class="dv">${r.repair_detail}</span></div>`:''}
+      ${r.close_image_url?`<div class="dr"><span class="dk">รูปหลังซ่อม</span><span class="dv"><img src="${driveImg(r.close_image_url)}" class="preview-img" onerror="this.style.display='none'"></span></div>`:''}
+    </div></div>
+    ${cost}${act}`;
+}
+
+async function doApprove(id){
+  if(!confirm('ยืนยันอนุมัติงาน '+id+'?'))return;
+  ld('กำลังอนุมัติ...');
+  try{const r=await api({action:'approveRequest',request_id:id});toast(r.message,r.success?'ok':'er');if(r.success)back();}finally{ul();}
+}
+async function doReject(id){
+  const rm=prompt('เหตุผลที่ไม่อนุมัติ:'); if(rm===null)return;
+  ld();try{const r=await api({action:'rejectRequest',request_id:id,remark:rm});toast(r.message,r.success?'ok':'er');if(r.success)back();}finally{ul();}
+}
+async function doAccept(id){
+  if(!confirm('รับงาน '+id+'?'))return;
+  ld();try{const r=await api({action:'acceptRequest',request_id:id});toast(r.message,r.success?'ok':'er');if(r.success)openDet(id);}finally{ul();}
+}
+async function doStart(id){
+  if(!confirm('เริ่มดำเนินการ '+id+'?'))return;
+  ld();try{const r=await api({action:'startWork',request_id:id});toast(r.message,r.success?'ok':'er');if(r.success)openDet(id);}finally{ul();}
+}
+function gotoClose(id){
+  $('cl-id').textContent='ปิดงานเลขที่: '+id;
+  $('cl-rid').value=id; $('cl-det').value='';
+  $('cl-p').value=0; $('cl-l').value=0; $('cl-o').value=0; calcCost();
+removeCloseImg(); $('cl-rating').value=0;
+document.querySelectorAll('#star-rating span').forEach(s=>s.style.opacity='0.3');
+$('rating-label').textContent='ยังไม่ได้ให้คะแนน'; $('rating-label').style.color='var(--muted)';
+  go('pg-close');
+}
+function calcCost(){
+  const p=parseFloat($('cl-p').value)||0,l=parseFloat($('cl-l').value)||0,o=parseFloat($('cl-o').value)||0;
+  $('cp').textContent=p.toFixed(2); $('cl').textContent=l.toFixed(2);
+  $('co').textContent=o.toFixed(2); $('ct').textContent=(p+l+o).toFixed(2)+' บาท';
+}
+async function submitClose(){
+  const det=$('cl-det').value.trim(); if(!det){toast('กรุณากรอกรายละเอียด','er');return;}
+  if($('cl-img-up').style.display!=='none'){toast('รอรูปภาพอัปโหลดเสร็จก่อน','er');return;}
+  $('btn-cl').disabled=true; ld('กำลังปิดงาน...');
+  try{const r=await api({action:'closeRequest',request_id:$('cl-rid').value,repair_detail:det,
+    cost_part:$('cl-p').value,cost_labor:$('cl-l').value,cost_other:$('cl-o').value,
+    remark:$('cl-rem').value,close_image_url:$('cl-img').value,rating_score:$('cl-rating').value});
+    toast(r.message,r.success?'ok':'er'); if(r.success)go('pg-dash');
+  }finally{ul();$('btn-cl').disabled=false;}
+}
+function setRating(n){
+  $('cl-rating').value=n;
+  document.querySelectorAll('#star-rating span').forEach((s,i)=>{
+    s.style.opacity=i<n?'1':'0.3';
+  });
+  const labels=['','ปรับปรุงได้','พอใช้','ดี','ดีมาก','ยอดเยี่ยม!'];
+  $('rating-label').textContent=labels[n]+' ('+n+'/5)';
+  $('rating-label').style.color='var(--orange)';
+}
+function prevCloseImg(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      const MAX=1200; let w=img.width,h=img.height;
+      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+      const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const resized=canvas.toDataURL('image/jpeg',0.8);
+      $('cl-img-prev').src=resized;
+      $('cl-img-preview-wrap').style.display='block';
+      $('cl-img-box').style.display='none';
+      uploadCloseImg(resized,'image/jpeg',file.name||('close_'+Date.now()+'.jpg'));
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeCloseImg(){
+  $('cl-img-prev').src=''; $('cl-img-preview-wrap').style.display='none';
+  $('cl-img-box').style.display='block'; $('cl-img-in').value=''; $('cl-img').value='';
+}
+async function uploadCloseImg(data,mime,name){
+  $('cl-img-up').style.display='block';
+  try{
+    const r=await api({action:'uploadImage',image_data:data.split(',')[1],mime_type:mime,file_name:name});
+    if(r.success){$('cl-img').value=r.url;toast('อัปโหลดรูปสำเร็จ','ok');}
+    else{toast('อัปโหลดล้มเหลว','er');removeCloseImg();}
+  }catch(e){toast('อัปโหลดล้มเหลว','er');removeCloseImg();}
+  finally{$('cl-img-up').style.display='none';}
+}
+
+function initNewForm(){
+  const u=sess.user;
+  $('r-who').value=u.full_name+' ('+u.username+')';
+  const now=new Date();
+  const pad=n=>String(n).padStart(2,'0');
+  const fmt=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  $('r-avail').value=fmt(now);
+  const fin=new Date(now); fin.setDate(fin.getDate()+7);
+  $('r-end').value=fmt(fin);
+  const doFill=()=>{
+    ['r-dept','uf-dp'].forEach(id=>fillSel(id,'department'));
+    fillSel('r-type','request_type'); fillSel('r-cat','work_category');
+    fillSel('r-mach','machine_status'); fillSel('r-urg','urgency');
+    const dept=$('r-dept');
+    for(let i=0;i<dept.options.length;i++){if(dept.options[i].value===u.department){dept.selectedIndex=i;break;}}
+  };
+  if(Object.keys(master).length>0) doFill();
+  else loadMaster().then(doFill);
+}
+
+function prevImg(e){
+  const file=e.target.files[0];
+  if(!file) return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      const MAX=1200;
+      let w=img.width, h=img.height;
+      if(w>MAX||h>MAX){
+        if(w>h){h=Math.round(h*MAX/w);w=MAX;}
+        else{w=Math.round(w*MAX/h);h=MAX;}
+      }
+      const canvas=document.createElement('canvas');
+      canvas.width=w; canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const resized=canvas.toDataURL('image/jpeg',0.8);
+      document.getElementById('img-prev').src=resized;
+      document.getElementById('img-preview-wrap').style.display='block';
+      document.getElementById('img-box').style.display='none';
+      uploadImg(resized,'image/jpeg',file.name||('img_'+Date.now()+'.jpg'));
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+function removeImg(){
+  $('img-prev').src=''; $('img-preview-wrap').style.display='none';
+  $('img-box').style.display='block'; $('img-in').value=''; $('r-img').value='';
+}
+async function uploadImg(data,mime,name){
+  $('img-up').style.display='block';
+  try{
+    const r=await api({action:'uploadImage',image_data:data.split(',')[1],mime_type:mime,file_name:name});
+    if(r.success){$('r-img').value=r.url;toast('อัปโหลดรูปสำเร็จ','ok');}
+    else{toast('อัปโหลดล้มเหลว — ลองใหม่','er');removeImg();}
+  }catch(e){toast('อัปโหลดล้มเหลว','er');removeImg();}
+  finally{$('img-up').style.display='none';}
+}
+function clearForm(){
+  ['r-type','r-cat','r-mach','r-urg'].forEach(id=>{const el=$(id);if(el)el.selectedIndex=0;});
+  $('r-det').value=''; removeImg();
+}
+async function submitReq(){
+  const checks=[
+    {id:'r-dept',label:'หน่วยงาน'},{id:'r-type',label:'ประเภทการแจ้ง'},
+    {id:'r-avail',label:'วันที่เข้าซ่อมได้'},{id:'r-end',label:'วันที่ต้องการให้เสร็จ'},
+    {id:'r-cat',label:'หมวดหมู่งาน'},{id:'r-mach',label:'สถานะเครื่องจักร'},
+    {id:'r-det',label:'รายละเอียด / สถานที่'},{id:'r-img',label:'รูปภาพ'},
+    {id:'r-urg',label:'ระดับความเร่งด่วน'},
+  ];
+  for(const c of checks){
+    const v=$(c.id).value.trim();
+    if(!v){toast('กรุณากรอก: '+c.label,'er');$(c.id).focus();return;}
+  }
+  if($('img-up').style.display!=='none'){toast('รอรูปภาพอัปโหลดเสร็จก่อน','er');return;}
+  $('btn-sr').disabled=true; ld('กำลังส่งข้อมูล...');
+  try{
+    const r=await api({action:'createRequest',
+      department:$('r-dept').value, request_type:$('r-type').value,
+      available_repair_date:$('r-avail').value, required_finish_date:$('r-end').value,
+      work_category:$('r-cat').value, machine_status:$('r-mach').value,
+      problem_detail:$('r-det').value.trim(), urgency:$('r-urg').value,
+      image_url:$('r-img').value
+    });
+    toast(r.message,r.success?'ok':'er');
+    if(r.success){clearForm();go('pg-dash');}
+  }catch(e){toast('ส่งข้อมูลล้มเหลว ลองใหม่','er');}
+  finally{ul();$('btn-sr').disabled=false;}
+}
+
+function initRpt(){
+  const y=$('rpt-y'); if(!y.options.length){
+    const cur=new Date().getFullYear();
+    for(let i=cur;i>=cur-3;i--) y.innerHTML+=`<option value="${i}" ${i===cur?'selected':''}>${i+543}</option>`;
+  }
+  loadRpt();
+}
+async function loadRpt(){
+  ld();
+  try{
+    const r=await api({action:'getReport',report_type:rptTab,month:$('rpt-m').value,year:$('rpt-y').value});
+    if(r.success){
+      const d=r.data, s=r.summary;
+      const done=d.filter(x=>x.current_status==='เสร็จสิ้น').length;
+      const pend=d.filter(x=>x.current_status!=='เสร็จสิ้น'&&x.current_status!=='ไม่อนุมัติ').length;
+      const cost=(s?.total_cost||d.reduce((a,x)=>a+(+x.total_cost||0),0));
+      $('rpt-sum').innerHTML=`
+        <div class="scard s0" style="cursor:default"><div class="snum">${d.length}</div><div class="slbl">ทั้งหมด</div></div>
+        <div class="scard s1" style="cursor:default"><div class="snum">${done}</div><div class="slbl">เสร็จสิ้น</div></div>
+        <div class="scard s3" style="cursor:default"><div class="snum">${pend}</div><div class="slbl">ค้างอยู่</div></div>
+        <div class="scard" style="cursor:default"><div class="snum" style="font-size:20px;color:var(--orange)">${cost.toLocaleString()}</div><div class="slbl">ค่าใช้จ่าย (฿)</div></div>`;
+
+      const byDept=(()=>{
+        if(s?.by_department && Object.keys(s.by_department).length>0) return s.by_department;
+        const bd={};
+        d.filter(x=>x.current_status==='เสร็จสิ้น').forEach(x=>{
+          if(!bd[x.department]) bd[x.department]={count:0,total:0};
+          bd[x.department].count++;
+          bd[x.department].total+=(+x.total_cost||0);
+        });
+        return bd;
+      })();
+      const deptKeys=Object.keys(byDept);
+      if(deptKeys.length>0){
+        const maxVal=Math.max(...deptKeys.map(k=>byDept[k].total));
+        const total=deptKeys.reduce((a,k)=>a+byDept[k].total,0);
+        const colors=['#1976D2','#E65100','#2E7D32','#6A1B9A','#00695C','#C62828','#F9A825','#0288D1'];
+
+        // แท่งแนวตั้ง
+        const barW=Math.min(60,Math.floor(300/deptKeys.length));
+        const barItems=deptKeys.map((k,i)=>{
+          const pct=maxVal>0?Math.round(byDept[k].total/maxVal*100):0;
+          return `<div style="display:flex;flex-direction:column;align-items:center;flex:1;gap:4px">
+            <div style="font-size:11px;font-weight:600;color:${colors[i%colors.length]}">${byDept[k].total.toLocaleString()}</div>
+            <div style="width:100%;max-width:50px;height:120px;display:flex;align-items:flex-end">
+              <div style="width:100%;background:${colors[i%colors.length]};height:${pct}%;border-radius:6px 6px 0 0;transition:height .4s;min-height:4px"></div>
+            </div>
+            <div style="font-size:10px;color:#424242;text-align:center;word-break:break-all">${k}</div>
+          </div>`;
+        }).join('');
+
+        // Pie chart (SVG)
+        let slices='', startAngle=0, legend='';
+        deptKeys.forEach((k,i)=>{
+          const pct=total>0?byDept[k].total/total:0;
+          const angle=pct*360;
+          const endAngle=startAngle+angle;
+          const r=80, cx=100, cy=100;
+          const x1=cx+r*Math.sin(startAngle*Math.PI/180);
+          const y1=cy-r*Math.cos(startAngle*Math.PI/180);
+          const x2=cx+r*Math.sin(endAngle*Math.PI/180);
+          const y2=cy-r*Math.cos(endAngle*Math.PI/180);
+          const large=angle>180?1:0;
+          slices+=`<path d="M${cx},${cy} L${x1},${y1} A${r},${r} 0 ${large},1 ${x2},${y2} Z" fill="${colors[i%colors.length]}" stroke="#fff" stroke-width="2"/>`;
+          legend+=`<div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
+            <div style="width:12px;height:12px;border-radius:3px;background:${colors[i%colors.length]};flex-shrink:0"></div>
+            <span style="font-size:12px;color:#424242">${k} <b>${Math.round(pct*100)}%</b></span>
+          </div>`;
+          startAngle=endAngle;
+        });
+
+        $('rpt-sum').innerHTML+=`
+          <div class="card" style="grid-column:1/-1"><div class="card-p">
+            <div class="sec" style="margin-bottom:12px">ค่าใช้จ่ายตามหน่วยงาน</div>
+            <div style="display:flex;align-items:flex-end;gap:8px;padding:8px 0;border-bottom:1px solid #F5F5F5;margin-bottom:16px">
+              ${barItems}
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;margin-top:8px">
+              <svg viewBox="0 0 200 200" style="width:140px;height:140px;flex-shrink:0">${slices}</svg>
+              <div>${legend}</div>
+            </div>
+          </div></div>`;
+      }
+      renderList('rpt-ls',d);
+      renderList('rpt-ls',d);
+    }
+  }catch(e){}finally{ul();}
+}
+
+async function loadUsr(){ld();try{const r=await api({action:'getUsers'});if(r.success){allUsrs=r.data;renderUsr(r.data);}else toast(r.message,'er');}finally{ul();}}
+function filterUsr(){const q=$('sch-usr').value.toLowerCase();renderUsr(allUsrs.filter(u=>u.username.toLowerCase().includes(q)||u.full_name.toLowerCase().includes(q)));}
+function renderUsr(us){
+  const el=$('ls-usr');
+  if(!us.length){el.innerHTML=`<div class="empty"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><p>ไม่มีผู้ใช้</p></div>`;return;}
+  el.innerHTML=us.map(u=>`
+    <div class="uchip" onclick="editUsr('${u.user_id}')">
+      <div class="uav">${u.full_name?u.full_name.charAt(0).toUpperCase():'U'}</div>
+      <div style="flex:1">
+        <div style="font-size:15px;font-weight:500">${u.full_name}</div>
+        <div style="font-size:12px;color:var(--muted)">${u.username} · ${u.department} · ${u.roles}</div>
+      </div>
+      <span class="tag ${u.status==='Active'?'tag-ok':'tag-no'}">${u.status}</span>
+    </div>`).join('');
+}
+function initUF(){$('uf-title').textContent='เพิ่มผู้ใช้';$('uf-id').value='';['uf-un','uf-pw','uf-fn','uf-tg'].forEach(id=>$(id).value='');$('uf-st').value='Active';document.querySelectorAll('#uf-roles input').forEach(c=>c.checked=c.value==='User');}
+function editUsr(id){
+  const u=allUsrs.find(x=>x.user_id===id); if(!u)return;
+  $('uf-title').textContent='แก้ไขผู้ใช้';
+  $('uf-id').value=u.user_id; $('uf-un').value=u.username; $('uf-pw').value='';
+  $('uf-fn').value=u.full_name; $('uf-tg').value=u.telegram_id||''; $('uf-st').value=u.status;
+  const dp=$('uf-dp'); for(let i=0;i<dp.options.length;i++){if(dp.options[i].value===u.department){dp.selectedIndex=i;break;}}
+  const roles=(u.roles||'').split(',').map(r=>r.trim());
+  document.querySelectorAll('#uf-roles input').forEach(c=>c.checked=roles.includes(c.value));
+  go('pg-uf');
+}
+async function submitUF(){
+  const uid=$('uf-id').value,un=$('uf-un').value.trim(),fn=$('uf-fn').value.trim();
+  if(!un||!fn){toast('กรุณากรอกให้ครบ','er');return;}
+  const roles=Array.from(document.querySelectorAll('#uf-roles input:checked')).map(c=>c.value).join(',');
+  if(!roles){toast('เลือกสิทธิ์อย่างน้อย 1','er');return;}
+  $('btn-uf').disabled=true; ld('กำลังบันทึก...');
+  try{const r=await api({action:uid?'updateUser':'createUser',user_id:uid,username:un,password:$('uf-pw').value,
+    full_name:fn,department:$('uf-dp').value,roles,telegram_id:$('uf-tg').value,status:$('uf-st').value});
+    toast(r.message,r.success?'ok':'er'); if(r.success){back();loadUsr();}
+  }finally{ul();$('btn-uf').disabled=false;}
+}
+
+async function loadSet(){ld();try{const r=await api({action:'getSettings'});if(r.success){const s=r.data;$('set-nm').value=s.system_name||'';$('set-url').value=s.app_url||'';$('set-tk').value=s.telegram_bot_token||s.bot_token_telegram||'';$('set-gid').value=s.telegram_group_id||'';$('set-drv').value=s.google_drive_folder_id||'';}}finally{ul();}}
+async function saveSets(){ld('กำลังบันทึก...');try{const r=await api({action:'updateSettings',settings:{system_name:$('set-nm').value,app_url:$('set-url').value,telegram_bot_token:$('set-tk').value,telegram_group_id:$('set-gid').value,google_drive_folder_id:$('set-drv').value}});toast(r.message,r.success?'ok':'er');}finally{ul();}}
+async function clearAll(){if(!confirm('ล้างข้อมูลทั้งหมด?'))return;if(!confirm('ยืนยันอีกครั้ง — ลบถาวร!'))return;ld('กำลังล้างข้อมูล...');try{const r=await api({action:'clearFormData'});toast(r.message,r.success?'ok':'er');}finally{ul();}}
+
+function driveImg(url){
+  if(!url) return '';
+  let m=url.match(/\/file\/d\/([^/]+)/);
+  if(m) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+  m=url.match(/[?&]id=([^&]+)/);
+  if(m) return `https://drive.google.com/uc?export=view&id=${m[1]}`;
+  return url;
+}
+
+window.addEventListener('load',()=>{
+  checkSess();
+  $('lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+});
+</script>
+</body>
+<!-- v2 -->
+</html>
+ 
