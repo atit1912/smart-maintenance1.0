@@ -771,7 +771,7 @@ function go(id,navEl){
   if(id==='pg-dash') hist=[];
   else if(hist[hist.length-1]!==id) hist.push(id);
   if(navEl){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('on'));navEl.classList.add('on');}
-  const noNav=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-profile'];
+  const noNav=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-profile','pg-rpt'];
   $('bnav').style.display=noNav.includes(id)?'none':'flex';
   updateFab(id);
   if(id==='pg-dash') loadDash();
@@ -1888,7 +1888,7 @@ async function updateSmartHeader(){
 function updateFab(pageId){
   const fab=$('fab-btn');
   if(!fab) return;
-  const hideFab=['pg-new','pg-close','pg-uf','pg-set','pg-login','pg-profile'];
+  const hideFab=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-login','pg-profile'];
   fab.className=hideFab.includes(pageId)?'fab hide':'fab';
 }
 
