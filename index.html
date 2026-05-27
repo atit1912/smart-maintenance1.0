@@ -1057,48 +1057,64 @@ function renderDet(r){
       <button class="btn btn-orange mt12" onclick="submitRating()">ส่งคะแนน</button>
     </div></div>`:'';
 
+  // ── Timeline ──────────────────────────────────────────────
+  const tlColors={'แจ้งซ่อม':'#1976D2','อนุมัติ':'#2E7D32','ไม่อนุมัติ':'#C62828','ช่างรับงาน':'#E65100','กำลังดำเนินการ':'#6A1B9A','เสร็จสิ้น':'#00695C'};
+  const tlIcons={'แจ้งซ่อม':'📋','อนุมัติ':'✅','ไม่อนุมัติ':'❌','ช่างรับงาน':'👷','กำลังดำเนินการ':'🔧','เสร็จสิ้น':'🏁'};
+  const tlItems=[];
+  tlItems.push({status:'แจ้งซ่อม',by:r.requester_name,at:r.created_at,note:r.problem_detail,img:r.image_url});
+  if(r.approved_by) tlItems.push({status:'อนุมัติ',by:r.approved_by,at:r.approved_at,note:''});
+  if(r.rejected_by) tlItems.push({status:'ไม่อนุมัติ',by:r.rejected_by,at:r.rejected_at,note:r.remark});
+  if(r.assigned_to) tlItems.push({status:'ช่างรับงาน',by:r.assigned_to,at:r.accepted_at,note:''});
+  if(r.work_start_at) tlItems.push({status:'กำลังดำเนินการ',by:r.assigned_to||'',at:r.work_start_at,note:''});
+  if(r.closed_by) tlItems.push({status:'เสร็จสิ้น',by:r.closed_by,at:r.closed_at,note:r.repair_detail,img:r.close_image_url,rating:r.rating_score});
+  const tlHtml=tlItems.map((t,i)=>`
+    <div style="display:flex;gap:12px;${i<tlItems.length-1?'margin-bottom:4px':''}">
+      <div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0">
+        <div style="width:36px;height:36px;border-radius:50%;background:${tlColors[t.status]||'#9E9E9E'};display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0">${tlIcons[t.status]||'📌'}</div>
+        ${i<tlItems.length-1?`<div style="width:2px;flex:1;min-height:32px;background:${tlColors[t.status]||'#E0E0E0'};margin:2px 0"></div>`:''}
+      </div>
+      <div style="padding-top:4px;flex:1;padding-bottom:${i<tlItems.length-1?'12px':'0'}">
+        <div style="font-size:14px;font-weight:600;color:${tlColors[t.status]||'#424242'}">${t.status}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">${t.by||''} ${t.at?'· '+fdatetime(t.at):''}</div>
+        ${t.note?`<div style="margin-top:6px;background:var(--blue-light);border-radius:8px;padding:8px 10px;font-size:13px;white-space:pre-wrap">${t.note}</div>`:''}
+        ${t.img?`<img src="${driveImg(t.img)}" class="preview-img" style="margin-top:8px" onerror="this.style.display='none'">`:''}
+        ${t.rating?`<div style="margin-top:6px;font-size:13px;color:var(--orange);font-weight:600">คะแนน: ${'⭐'.repeat(+t.rating)} (${t.rating}/5)</div>`:''}
+      </div>
+    </div>`).join('');
+
   $('det-body').innerHTML=`
     ${act}
     <div class="card"><div class="card-p">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-        <span class="tag ${TAGS[r.current_status]||'tag-new'}" style="font-size:14px;padding:5px 14px">${r.current_status}</span>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span class="tag ${TAGS[r.current_status]||'tag-new'}" style="font-size:13px;padding:4px 12px">${r.current_status}</span>
         <span class="${UCLS[r.urgency]||''}" style="font-size:13px">${r.urgency}</span>
       </div>
-      <div style="display:flex;align-items:center;justify-content:center;margin-bottom:16px;overflow-x:auto;padding:8px 0">
-        ${['แจ้งซ่อม','อนุมัติ','ช่างรับงาน','กำลังดำเนินการ','เสร็จสิ้น'].map((s,i,arr)=>{
-          const icons=['📋','✅','👷','🔧','🏁'];
-          const colors={'แจ้งซ่อม':'#1976D2','อนุมัติ':'#2E7D32','ช่างรับงาน':'#E65100','กำลังดำเนินการ':'#6A1B9A','เสร็จสิ้น':'#00695C'};
-          const statusOrder=['แจ้งซ่อม','อนุมัติ','ช่างรับงาน','กำลังดำเนินการ','เสร็จสิ้น'];
-          const curIdx=statusOrder.indexOf(r.current_status);
-          const isDone=i<=curIdx; const isCur=i===curIdx;
-          return `<div style="display:flex;align-items:center">
-            <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-              <div style="width:40px;height:40px;border-radius:50%;background:${isDone?colors[s]:'#E0E0E0'};display:flex;align-items:center;justify-content:center;font-size:18px;${isCur?'box-shadow:0 0 0 3px '+colors[s]+'40':''}">
-                ${icons[i]}
-              </div>
-              <span style="font-size:10px;color:${isDone?colors[s]:'#9E9E9E'};font-weight:${isCur?'700':'400'};text-align:center;width:52px">${s}</span>
-            </div>
-            ${i<arr.length-1?`<div style="width:20px;height:2px;background:${i<curIdx?colors[arr[i+1]]:'#E0E0E0'};margin-bottom:20px;flex-shrink:0"></div>`:''}
-          </div>`;
-        }).join('')}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px">
+          <div style="font-size:11px;color:var(--muted)">หน่วยงาน</div>
+          <div style="font-size:13px;font-weight:500;margin-top:2px">${r.department}</div>
+        </div>
+        <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px">
+          <div style="font-size:11px;color:var(--muted)">หมวดหมู่</div>
+          <div style="font-size:13px;font-weight:500;margin-top:2px">${r.work_category}</div>
+        </div>
+        <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px">
+          <div style="font-size:11px;color:var(--muted)">เข้าซ่อมได้</div>
+          <div style="font-size:13px;font-weight:500;margin-top:2px">${fdate(r.available_repair_date)}</div>
+        </div>
+        <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px">
+          <div style="font-size:11px;color:var(--muted)">ต้องเสร็จ</div>
+          <div style="font-size:13px;font-weight:500;margin-top:2px">${fdate(r.required_finish_date)}</div>
+        </div>
       </div>
-      ${r.rating_score?`<div style="text-align:center;margin-bottom:12px;font-size:13px;color:var(--orange);font-weight:600">คะแนนการซ่อม: ${'⭐'.repeat(+r.rating_score)} (${r.rating_score}/5)</div>`:''}
-      ${img}
-      <div class="dr"><span class="dk">ผู้แจ้ง</span><span class="dv">${r.requester_name}</span></div>
-      <div class="dr"><span class="dk">หน่วยงาน</span><span class="dv">${r.department}</span></div>
-      <div class="dr"><span class="dk">ประเภท</span><span class="dv">${r.request_type}</span></div>
-      <div class="dr"><span class="dk">หมวดหมู่</span><span class="dv">${r.work_category}</span></div>
-      <div class="dr"><span class="dk">วันที่แจ้ง</span><span class="dv">${fdatetime(r.created_at)}</span></div>
-      <div class="dr"><span class="dk">เข้าซ่อมได้</span><span class="dv">${fdate(r.available_repair_date)}</span></div>
-      <div class="dr"><span class="dk">ต้องเสร็จ</span><span class="dv">${fdate(r.required_finish_date)}</span></div>
-      <div class="dr"><span class="dk">สถานะเครื่อง</span><span class="dv">${r.machine_status}</span></div>
-      <div class="dr"><span class="dk">รายละเอียด</span><span class="dv" style="white-space:pre-wrap">${r.problem_detail}</span></div>
-      ${r.approved_by?`<div class="dr"><span class="dk">อนุมัติโดย</span><span class="dv">${r.approved_by} (${fdate(r.approved_at)})</span></div>`:''}
-      ${r.rejected_by?`<div class="dr"><span class="dk">ไม่อนุมัติโดย</span><span class="dv" style="color:var(--red)">${r.rejected_by}<br>${r.remark||''}</span></div>`:''}
-      ${r.assigned_to?`<div class="dr"><span class="dk">ช่างรับงาน</span><span class="dv">${r.assigned_to} (${fdate(r.accepted_at)})</span></div>`:''}
-      ${r.repair_detail?`<div class="dr"><span class="dk">วิธีซ่อม</span><span class="dv">${r.repair_detail}</span></div>`:''}
-      ${r.closed_by?`<div class="dr"><span class="dk">ปิดงานโดย</span><span class="dv">${r.closed_by}</span></div>`:''}
-      ${r.close_image_url?`<div class="dr"><span class="dk">รูปหลังซ่อม</span><span class="dv"><img src="${driveImg(r.close_image_url)}" class="preview-img" onerror="this.style.display='none'"></span></div>`:''}
+      <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px">
+        <div style="font-size:11px;color:var(--muted)">สถานะเครื่องจักร</div>
+        <div style="font-size:13px;font-weight:500;margin-top:2px">${r.machine_status}</div>
+      </div>
+    </div></div>
+    <div class="card"><div class="card-p">
+      <div class="sec" style="margin-bottom:12px">ประวัติการดำเนินงาน</div>
+      ${tlHtml}
     </div></div>
     ${cost}${ratingHtml}`;
 }
