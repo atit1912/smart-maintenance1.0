@@ -21,7 +21,7 @@ body{font-family:'Sarabun',sans-serif;background:#F0F2F5;color:#1a1a1a;font-size
   --white:#FFFFFF;--text:#1a1a1a;--muted:#616161
 }
 #app{width:100%;max-width:430px;margin:0 auto;min-height:100vh;position:relative;background:#F0F2F5}
-.page{display:none;flex-direction:column;min-height:100vh;padding-bottom:88px;background:#F0F2F5}
+.page{display:none;flex-direction:column;min-height:100vh;padding-bottom:68px;background:#F0F2F5}
 .page.on{display:flex}
 .bar{background:var(--blue);color:#fff;height:52px;display:flex;align-items:center;padding:0 8px 0 4px;position:sticky;top:0;z-index:50}
 .bar-back{background:none;border:none;color:#fff;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px}
@@ -220,12 +220,6 @@ body.dark [style*="grid-template-columns:1fr 1fr"] > div > div:last-child{color:
 /* Smart Header Colors */
 .bar.urgent{background:#C62828}
 .bar.warning{background:#E65100}
-
-/* FAB */
-.fab{position:fixed;bottom:78px;right:16px;width:52px;height:52px;border-radius:50%;background:var(--blue);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(25,118,210,0.4);z-index:49;transition:transform .15s}
-.fab:active{transform:scale(.92)}
-.fab svg{width:24px;height:24px;stroke:#fff;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
-.fab.hide{display:none}
 
 /* Card Radius */
 .card{border-radius:16px}
@@ -749,11 +743,6 @@ body.dark .notif-title{color:#E0E0E0}
     <div id="notif-list"></div>
   </div>
 
-  <!-- FAB -->
-  <button class="fab hide" id="fab-btn" onclick="go('pg-new')">
-    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-  </button>
-
 </div><!-- /main -->
 </div><!-- /app -->
 
@@ -789,7 +778,6 @@ function go(id,navEl){
   if(navEl){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('on'));navEl.classList.add('on');}
   const noNav=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-profile'];
   $('bnav').style.display=noNav.includes(id)?'none':'flex';
-  const fab=$('fab-btn');if(fab) fab.className=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-login','pg-profile','pg-rpt','pg-dash','pg-all','pg-mine','pg-apv','pg-acc','pg-wip','pg-usr'].includes(id)?'fab hide':'fab';
   if(id==='pg-dash') loadDash();
   if(id==='pg-all'){initAllYear();loadAll();}
   if(id==='pg-mine'){initMineYear();loadMine();}
@@ -1938,14 +1926,7 @@ async function updateSmartHeader(){
   }catch(e){}
 }
 
-// ── FAB ────────────────────────────────────────────────────
-function updateFab(pageId){
-  const fab=$('fab-btn');
-  const fab=$('fab-btn');
-if(!fab) return;
-const hideFab=['pg-new','pg-close','pg-uf','pg-set','pg-login','pg-profile'];
-fab.className=hideFab.includes(pageId)?'fab hide':'fab';
-}
+
 
 // ── Avatar ─────────────────────────────────────────────────
 let selectedAvatar = '🐯';
