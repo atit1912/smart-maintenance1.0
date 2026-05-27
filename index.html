@@ -1009,7 +1009,7 @@ async function openDet(id){
   ld('กำลังโหลด...');
   try{const r=await api({action:'getRequestById',request_id:id});
     if(!r.success){toast(r.message,'er');return;}
-    renderDet(r.data); go('pg-det');
+    renderDet(r.data); go('pg-det'); updateFab('pg-det');
   }catch(e){toast('โหลดล้มเหลว','er');}finally{ul();}
 }
 
