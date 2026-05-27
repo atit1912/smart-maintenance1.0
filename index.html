@@ -234,7 +234,7 @@ body.dark .notif-title{color:#E0E0E0}
     <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
   </div>
   <div style="text-align:center">
-    <div style="color:#fff;font-size:20px;font-weight:600;letter-spacing:1px">SMART MAINTENANCE</div>
+    <div style="color:#fff;font-size:20px;font-weight:600;letter-spacing:1px">SMART MAINTENANCE 1.0</div>
     <div style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:4px">ศูนย์วิจัยเพชรบุรี</div>
   </div>
   <div class="splash-bar-wrap"><div class="splash-bar"></div></div>
@@ -246,7 +246,7 @@ body.dark .notif-title{color:#E0E0E0}
 <div class="login-wrap" id="pg-login">
   <div class="login-logo">
     <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
-    <h1>SMART MAINTENANCE</h1>
+    <h1>SMART MAINTENANCE 1.0</h1>
     <p>ระบบแจ้งซ่อมออนไลน์ ศูนย์วิจัยเพชรบุรี</p>
   </div>
   <div class="fg"><label class="fl">Username</label><input id="lu" type="text" class="fc" placeholder="กรอก username" autocomplete="username"></div>
@@ -265,6 +265,9 @@ body.dark .notif-title{color:#E0E0E0}
   </div>
   <button class="btn btn-blue" onclick="doLogin()" id="btn-login">เข้าสู่ระบบ</button>
   <div id="lerr" style="display:none" class="alert alert-err mt12"></div>
+  <div style="text-align:center;margin-top:24px;padding-top:16px;border-top:1px solid var(--border);">
+    <span style="font-size:11px;color:var(--blue);font-weight:500;">Developed by Atit Chimnan</span>
+  </div>
 </div>
 
 <div id="main" style="display:none">
@@ -1041,13 +1044,11 @@ async function loadRpt(){
         $('rpt-sum').innerHTML+=`<div class="card" style="grid-column:1/-1"><div class="card-p">
           <div class="sec" style="margin-bottom:12px">ค่าใช้จ่ายตามหน่วยงาน</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">${legendHtml}</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:center">
-            <div style="position:relative;height:220px;">
-              <canvas id="rpt-donut" role="img" aria-label="Donut chart department cost"></canvas>
-            </div>
-            <div style="position:relative;height:220px;">
-              <canvas id="rpt-bar" role="img" aria-label="Bar chart department cost"></canvas>
-            </div>
+          <div style="position:relative;width:100%;height:280px;margin-bottom:20px">
+            <canvas id="rpt-donut" role="img" aria-label="Donut chart department cost"></canvas>
+          </div>
+          <div style="position:relative;width:100%;height:240px">
+            <canvas id="rpt-bar" role="img" aria-label="Bar chart department cost in baht"></canvas>
           </div>
         </div></div>`;
 
@@ -1217,13 +1218,13 @@ function exportPDF(mLabel,yLabel){
   const listRows=expData.map((r,i)=>`<tr style="background:${i%2===0?'#ffffff':'#F9FAFB'}!important"><td style="color:#1976D2;font-weight:600">${r.request_id}</td><td>${r.created_at?new Date(r.created_at).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'}):''}</td><td>${r.requester_name||''}</td><td>${r.department||''}</td><td>${r.work_category||''}</td><td>${badge(r.current_status)}</td><td style="text-align:right">${(+r.total_cost||0).toLocaleString()}</td><td style="text-align:center">${r.rating_score?'⭐'.repeat(+r.rating_score):'-'}</td></tr>`).join('');
   const deptRows=Object.keys(byDept).map((k,i)=>`<tr style="background:${i%2===0?'#ffffff':'#F9FAFB'}!important"><td>${k}</td><td style="text-align:center">${byDept[k].count}</td><td style="text-align:right">${byDept[k].total.toLocaleString()}</td></tr>`).join('');
 
-  const html=`<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>รายงาน Smart Maintenance ${mLabel} ${yLabel}</title>
+  const html=`<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>รายงาน Smart Maintenance 1.0 ${mLabel} ${yLabel}</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
-body{font-family:'Sarabun',sans-serif;background:#F0F2F5;color:#1a1a1a;font-size:14px}
+body{font-family:'Sarabun',sans-serif;background:#F0F2F5;color:#1a1a1a;font-size:14px;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 .wrap{max-width:800px;margin:0 auto;background:#fff}
-.header{background:#1976D2!important;color:#fff!important;padding:20px 24px;display:flex;justify-content:space-between;align-items:flex-start;-webkit-print-color-adjust:exact!important}
+.header{background:#1976D2!important;color:#fff!important;padding:20px 24px;display:flex;justify-content:space-between;align-items:flex-start;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 .header h1{font-size:20px;font-weight:700;margin-bottom:2px;color:#fff!important}
 .header p{font-size:12px;color:rgba(255,255,255,0.85)!important}
 .header-right{text-align:right;font-size:12px;color:rgba(255,255,255,0.85)!important}
@@ -1235,38 +1236,42 @@ body{font-family:'Sarabun',sans-serif;background:#F0F2F5;color:#1a1a1a;font-size
 .stat-num{font-size:24px;font-weight:700;line-height:1}
 .stat-lbl{font-size:12px;margin-top:2px}
 table{width:100%;border-collapse:collapse;font-size:12px}
-th{background:#F0F2F5!important;-webkit-print-color-adjust:exact!important;padding:8px 10px;text-align:left;font-weight:600;color:#424242;font-size:11px}
+th{background:#F0F2F5!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;padding:8px 10px;text-align:left;font-weight:600;color:#424242;font-size:11px}
 td{padding:8px 10px;border-bottom:0.5px solid #F0F2F5;vertical-align:middle}
 tr{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+span[style*="background"]{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 .footer{text-align:center;font-size:11px;color:#9E9E9E;padding:16px;border-top:1px solid #E0E0E0}
-.print-btn{position:fixed;bottom:24px;right:24px;background:#1976D2!important;color:#fff!important;border:none;border-radius:50px;padding:12px 24px;font-size:15px;font-family:'Sarabun',sans-serif;font-weight:600;cursor:pointer;box-shadow:0 4px 12px rgba(25,118,210,0.4);display:flex;align-items:center;gap:8px;z-index:99}
+.print-area{padding-bottom:80px}
+.print-btn{display:flex;align-items:center;gap:8px;margin:24px auto 0;background:#1976D2!important;color:#fff!important;border:none;border-radius:50px;padding:12px 28px;font-size:15px;font-family:'Sarabun',sans-serif;font-weight:600;cursor:pointer;width:fit-content}
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
   .print-btn{display:none!important}
-  body{background:#fff!important}
-  .header{background:#1976D2!important}
-  .stat{-webkit-print-color-adjust:exact!important}
-  th{background:#F0F2F5!important}
-  tr{-webkit-print-color-adjust:exact!important}
+  body{background:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .wrap{background:#fff!important}
+  .header{background:#1976D2!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .stat{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  th{background:#F0F2F5!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  tr{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  span[style*="background"]{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
 }
 </style></head><body>
-<div class="wrap">
+<div class="wrap print-area">
   <div class="header">
-    <div><h1>Smart Maintenance</h1><p>ศูนย์วิจัยเพชรบุรี</p><p style="margin-top:4px">รายงานประจำเดือน ${mLabel} ${yLabel}</p></div>
+    <div><h1>Smart Maintenance 1.0</h1><p>ศูนย์วิจัยเพชรบุรี</p><p style="margin-top:4px">รายงานประจำเดือน ${mLabel} ${yLabel}</p></div>
     <div class="header-right"><p>พิมพ์โดย: ${sess?.user?.full_name||''}</p><p style="margin-top:4px">วันที่: ${new Date().toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'})}</p></div>
   </div>
   <div class="body">
     ${incSum?`<div class="section"><div class="section-title">สรุปสถิติ</div><div class="stats">
-      <div class="stat" style="background:#E3F0FB!important"><div class="stat-num" style="color:#1976D2">${expData.length}</div><div class="stat-lbl" style="color:#1256A0">งานทั้งหมด</div></div>
-      <div class="stat" style="background:#E8F5E9!important"><div class="stat-num" style="color:#2E7D32">${done}</div><div class="stat-lbl" style="color:#1B5E20">เสร็จสิ้น</div></div>
-      <div class="stat" style="background:#FFEBEE!important"><div class="stat-num" style="color:#C62828">${pend}</div><div class="stat-lbl" style="color:#B71C1C">ค้างอยู่</div></div>
-      <div class="stat" style="background:#FFF3E0!important"><div class="stat-num" style="color:#E65100;font-size:18px">${totalCost.toLocaleString()}</div><div class="stat-lbl" style="color:#BF360C">ค่าใช้จ่าย (฿)</div></div>
-      ${incRating?`<div class="stat" style="background:#FFF8E1!important;grid-column:1/-1"><div class="stat-num" style="color:#F9A825">${avgRating}</div><div class="stat-lbl" style="color:#F57F17">คะแนนเฉลี่ย (จาก 5)</div></div>`:''}
+      <div class="stat" style="background:#E3F0FB!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><div class="stat-num" style="color:#1976D2">${expData.length}</div><div class="stat-lbl" style="color:#1256A0">งานทั้งหมด</div></div>
+      <div class="stat" style="background:#E8F5E9!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><div class="stat-num" style="color:#2E7D32">${done}</div><div class="stat-lbl" style="color:#1B5E20">เสร็จสิ้น</div></div>
+      <div class="stat" style="background:#FFEBEE!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><div class="stat-num" style="color:#C62828">${pend}</div><div class="stat-lbl" style="color:#B71C1C">ค้างอยู่</div></div>
+      <div class="stat" style="background:#FFF3E0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><div class="stat-num" style="color:#E65100;font-size:18px">${totalCost.toLocaleString()}</div><div class="stat-lbl" style="color:#BF360C">ค่าใช้จ่าย (฿)</div></div>
+      ${incRating?`<div class="stat" style="background:#FFF8E1!important;grid-column:1/-1;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><div class="stat-num" style="color:#F9A825">${avgRating}</div><div class="stat-lbl" style="color:#F57F17">คะแนนเฉลี่ย (จาก 5)</div></div>`:''}
     </div></div>`:''}
     ${incList?`<div class="section"><div class="section-title">รายการงาน (${expData.length} งาน)</div><table><thead><tr><th>เลขงาน</th><th>วันที่</th><th>ผู้แจ้ง</th><th>หน่วยงาน</th><th>หมวดหมู่</th><th>สถานะ</th><th style="text-align:right">รวม (฿)</th><th style="text-align:center">คะแนน</th></tr></thead><tbody>${listRows}</tbody></table></div>`:''}
-    ${incCost?`<div class="section"><div class="section-title">ค่าใช้จ่ายตามหน่วยงาน</div><table><thead><tr><th>หน่วยงาน</th><th style="text-align:center">จำนวนงาน</th><th style="text-align:right">รวม (฿)</th></tr></thead><tbody>${deptRows}<tr style="font-weight:700;border-top:2px solid #E0E0E0;background:#ffffff!important"><td>รวมทั้งหมด</td><td style="text-align:center">${expData.filter(r=>r.current_status==='เสร็จสิ้น').length}</td><td style="text-align:right;color:#1976D2">${totalCost.toLocaleString()}</td></tr></tbody></table></div>`:''}
+    ${incCost?`<div class="section"><div class="section-title">ค่าใช้จ่ายตามหน่วยงาน</div><table><thead><tr><th>หน่วยงาน</th><th style="text-align:center">จำนวนงาน</th><th style="text-align:right">รวม (฿)</th></tr></thead><tbody>${deptRows}<tr style="font-weight:700;border-top:2px solid #E0E0E0;background:#ffffff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><td>รวมทั้งหมด</td><td style="text-align:center">${expData.filter(r=>r.current_status==='เสร็จสิ้น').length}</td><td style="text-align:right;color:#1976D2">${totalCost.toLocaleString()}</td></tr></tbody></table></div>`:''}
   </div>
-  <div class="footer">Smart Maintenance | ศูนย์วิจัยเพชรบุรี | ${sess?.user?.full_name||''}</div>
+  <div class="footer">Smart Maintenance 1.0 | ศูนย์วิจัยเพชรบุรี | ${sess?.user?.full_name||''}</div>
 </div>
 <button class="print-btn" onclick="window.print()">
   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
