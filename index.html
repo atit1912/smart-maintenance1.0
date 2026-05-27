@@ -21,7 +21,7 @@ body{font-family:'Sarabun',sans-serif;background:#F0F2F5;color:#1a1a1a;font-size
   --white:#FFFFFF;--text:#1a1a1a;--muted:#616161
 }
 #app{width:100%;max-width:430px;margin:0 auto;min-height:100vh;position:relative;background:#F0F2F5}
-.page{display:none;flex-direction:column;min-height:100vh;padding-bottom:68px;background:#F0F2F5}
+.page{display:none;flex-direction:column;min-height:100vh;padding-bottom:88px;background:#F0F2F5}
 .page.on{display:flex}
 .bar{background:var(--blue);color:#fff;height:52px;display:flex;align-items:center;padding:0 8px 0 4px;position:sticky;top:0;z-index:50}
 .bar-back{background:none;border:none;color:#fff;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px}
@@ -29,6 +29,16 @@ body{font-family:'Sarabun',sans-serif;background:#F0F2F5;color:#1a1a1a;font-size
 .bar-title{flex:1;font-size:17px;font-weight:600;padding-left:4px}
 .bar-btn{background:none;border:none;color:#fff;width:40px;height:40px;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:8px}
 .bar-btn svg{width:20px;height:20px;stroke:#fff;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+/* Splash Screen */
+#splash{position:fixed;inset:0;background:#1976D2;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;z-index:9999;transition:opacity .5s}
+#splash.hide{opacity:0;pointer-events:none}
+.splash-logo{width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;animation:splashPulse 1.5s ease-in-out infinite}
+.splash-logo svg{width:48px;height:48px;stroke:#fff;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.splash-bar-wrap{width:180px;height:4px;background:rgba(255,255,255,0.2);border-radius:4px;overflow:hidden}
+.splash-bar{height:100%;background:#fff;border-radius:4px;animation:splashLoad 2s ease-in-out forwards}
+@keyframes splashPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+@keyframes splashLoad{0%{width:0%}100%{width:100%}}
+
 .nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:430px;background:#fff;border-top:1px solid var(--border);display:flex;z-index:50;height:58px}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;color:var(--gray);background:none;border:none;font-family:'Sarabun',sans-serif;font-size:10px;padding:6px 0}
 .nav-item svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -240,6 +250,21 @@ body.dark .notif-title{color:#E0E0E0}
 </style>
 </head>
 <body>
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="splash-logo">
+    <svg viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+  </div>
+  <div style="text-align:center">
+    <div style="color:#fff;font-size:20px;font-weight:600;letter-spacing:1px">SMART MAINTENANCE</div>
+    <div style="color:rgba(255,255,255,0.7);font-size:13px;margin-top:4px">ศูนย์วิจัยเพชรบุรี</div>
+  </div>
+  <div class="splash-bar-wrap">
+    <div class="splash-bar"></div>
+  </div>
+  <div style="color:rgba(255,255,255,0.5);font-size:12px">กำลังโหลด...</div>
+</div>
+
 <div id="app">
 
 <!-- LOGIN -->
@@ -1915,6 +1940,11 @@ function showUrgHint(val){
 }
 
 window.addEventListener('load',()=>{
+  // Splash screen
+  setTimeout(()=>{
+    const s=document.getElementById('splash');
+    if(s){s.classList.add('hide');setTimeout(()=>s.remove(),500);}
+  }, 2000);
   loadDarkMode();
   checkSess();
   $('lp').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
