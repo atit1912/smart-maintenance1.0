@@ -209,6 +209,13 @@ body.dark .scard.s3 .snum{color:#FFB74D}
 body.dark .scard.s4 .snum{color:#CE93D8}
 body.dark .scard.s5 .snum{color:#80CBC4}
 body.dark #toast{background:#333}
+body.dark [style*="background:var(--blue-light)"]{background:#1A2A3A!important}
+body.dark [style*="background:var(--blue-light)"] div{color:#90CAF9!important}
+body.dark [style*="background:var(--blue-light)"] .dv{color:#E0E0E0!important}
+body.dark .tl-note{background:#1E2D3D!important;color:#E0E0E0!important}
+body.dark [style*="grid-template-columns:1fr 1fr"] > div{background:#1E2D3D!important}
+body.dark [style*="grid-template-columns:1fr 1fr"] > div > div:first-child{color:#9E9E9E!important}
+body.dark [style*="grid-template-columns:1fr 1fr"] > div > div:last-child{color:#E0E0E0!important}
 
 /* Smart Header Colors */
 .bar.urgent{background:#C62828}
@@ -771,9 +778,9 @@ function go(id,navEl){
   if(id==='pg-dash') hist=[];
   else if(hist[hist.length-1]!==id) hist.push(id);
   if(navEl){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('on'));navEl.classList.add('on');}
-  const noNav=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-profile','pg-rpt'];
+  const noNav=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-profile'];
   $('bnav').style.display=noNav.includes(id)?'none':'flex';
-  const fab=$('fab-btn');if(fab) fab.className=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-login','pg-profile','pg-rpt','pg-dash','pg-all','pg-mine','pg-apv','pg-acc','pg-wip','pg-usr'].includes(id)?'fab hide':'fab';
+  updateFab(id);
   if(id==='pg-dash') loadDash();
   if(id==='pg-all'){initAllYear();loadAll();}
   if(id==='pg-mine'){initMineYear();loadMine();}
@@ -1009,7 +1016,7 @@ async function openDet(id){
   ld('กำลังโหลด...');
   try{const r=await api({action:'getRequestById',request_id:id});
     if(!r.success){toast(r.message,'er');return;}
-    renderDet(r.data); go('pg-det'); updateFab('pg-det');
+    renderDet(r.data); go('pg-det');
   }catch(e){toast('โหลดล้มเหลว','er');}finally{ul();}
 }
 
@@ -1076,7 +1083,7 @@ function renderDet(r){
       <div style="padding-top:4px;flex:1;padding-bottom:${i<tlItems.length-1?'12px':'0'}">
         <div style="font-size:14px;font-weight:600;color:${tlColors[t.status]||'#424242'}">${t.status}</div>
         <div style="font-size:12px;color:var(--muted);margin-top:2px">${t.by||''} ${t.at?'· '+fdatetime(t.at):''}</div>
-        ${t.note?`<div style="margin-top:6px;background:var(--blue-light);border-radius:8px;padding:8px 10px;font-size:13px;white-space:pre-wrap">${t.note}</div>`:''}
+        ${t.note?`<div class="tl-note" style="margin-top:6px;background:var(--blue-light);border-radius:8px;padding:8px 10px;font-size:13px;white-space:pre-wrap;color:#1a1a1a">${t.note}</div>`:''}
         ${t.img?`<img src="${driveImg(t.img)}" class="preview-img" style="margin-top:8px" onerror="this.style.display='none'">`:''}
         ${t.rating?`<div style="margin-top:6px;font-size:13px;color:var(--orange);font-weight:600">คะแนน: ${'⭐'.repeat(+t.rating)} (${t.rating}/5)</div>`:''}
       </div>
@@ -1888,7 +1895,7 @@ async function updateSmartHeader(){
 function updateFab(pageId){
   const fab=$('fab-btn');
   if(!fab) return;
-  const hideFab=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-login','pg-profile'];
+  const hideFab=['pg-new','pg-close','pg-uf','pg-set','pg-login','pg-profile'];
   fab.className=hideFab.includes(pageId)?'fab hide':'fab';
 }
 
