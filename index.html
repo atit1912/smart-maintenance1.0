@@ -141,9 +141,16 @@ select.fc{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='
 
 /* Dark Mode */
 body.dark{background:#121212;color:#E0E0E0}
-body.dark .card,body.dark .ri,body.dark .uchip,body.dark .mitem,body.dark .scard,body.dark .tabs,body.dark .srch{background:#1E1E1E;border-color:#333}
+body.dark .card,body.dark .ri,body.dark .uchip,body.dark .scard,body.dark .tabs,body.dark .srch{background:#1E1E1E;border-color:#333}
+body.dark .mitem{background:#1E1E1E;border-color:#333}
+body.dark .mitem span{color:#E0E0E0}
+body.dark .mitem svg{stroke:#9E9E9E}
 body.dark .bar{background:#1565C0}
+body.dark .bar.urgent{background:#B71C1C}
+body.dark .bar.warning{background:#BF360C}
 body.dark .nav{background:#1E1E1E;border-color:#333}
+body.dark .nav-item{color:#9E9E9E}
+body.dark .nav-item.on{color:#64B5F6}
 body.dark .body{background:#121212}
 body.dark .page{background:#121212}
 body.dark #app{background:#121212}
@@ -152,19 +159,46 @@ body.dark .fl{color:#BDBDBD}
 body.dark .sec{color:#9E9E9E}
 body.dark .dk{color:#9E9E9E}
 body.dark .dv{color:#E0E0E0}
-body.dark .muted{color:#9E9E9E}
+body.dark .slbl{color:#9E9E9E}
+body.dark .ri-title{color:#E0E0E0}
+body.dark .ri-meta{color:#9E9E9E}
+body.dark .ri-id{color:#64B5F6}
 body.dark .pbanner{background:#1565C0}
+body.dark .pname{color:#fff}
+body.dark .prole{color:rgba(255,255,255,0.85)}
 body.dark .alert-info{background:#1A3A5C;color:#90CAF9;border-color:#1976D2}
+body.dark .alert-err{background:#3B1A1A;color:#EF9A9A;border-color:#C62828}
 body.dark .btn-gray{background:#333;color:#E0E0E0}
+body.dark .btn-ghost{background:#1E1E1E;color:#64B5F6;border-color:#1976D2}
+body.dark .btn-ghost-red{background:#1E1E1E;color:#EF9A9A;border-color:#C62828}
 body.dark #ld{background:rgba(0,0,0,0.88)}
+body.dark #ld p{color:#9E9E9E}
 body.dark .login-wrap{background:#1E1E1E}
+body.dark .login-logo h1{color:#64B5F6}
 body.dark .img-area{background:#2C2C2C;border-color:#444}
 body.dark select.fc{background-color:#2C2C2C}
-body.dark .tab{color:#9E9E9E}
+body.dark .tab{color:#9E9E9E;background:none}
 body.dark .tab.on{background:#1976D2;color:#fff}
-body.dark .crow{border-color:#333}
-body.dark .dr{border-color:#333}
+body.dark .crow{border-color:#333;color:#E0E0E0}
+body.dark .crow.tot{border-color:#444}
+body.dark .dr{border-color:#2C2C2C}
 body.dark .card-p{background:#1E1E1E}
+body.dark .divider{background:#333}
+body.dark .empty p{color:#757575}
+body.dark .empty svg{stroke:#444}
+body.dark .tag-new{background:#0D2A42;color:#64B5F6}
+body.dark .tag-ok{background:#0D2A1A;color:#81C784}
+body.dark .tag-no{background:#2A0D0D;color:#EF9A9A}
+body.dark .tag-acc{background:#2A1A0D;color:#FFB74D}
+body.dark .tag-wip{background:#1A0D2A;color:#CE93D8}
+body.dark .tag-done{background:#0D1F1D;color:#80CBC4}
+body.dark .scard.s0 .snum{color:#64B5F6}
+body.dark .scard.s1 .snum{color:#81C784}
+body.dark .scard.s2 .snum{color:#EF9A9A}
+body.dark .scard.s3 .snum{color:#FFB74D}
+body.dark .scard.s4 .snum{color:#CE93D8}
+body.dark .scard.s5 .snum{color:#80CBC4}
+body.dark #toast{background:#333}
 
 /* Smart Header Colors */
 .bar.urgent{background:#C62828}
