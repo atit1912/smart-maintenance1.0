@@ -773,7 +773,7 @@ function go(id,navEl){
   if(navEl){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('on'));navEl.classList.add('on');}
   const noNav=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-profile','pg-rpt'];
   $('bnav').style.display=noNav.includes(id)?'none':'flex';
-  const fab=$('fab-btn');if(fab) fab.className=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-login','pg-profile','pg-rpt','pg-dash'].includes(id)?'fab hide':'fab';
+  const fab=$('fab-btn');if(fab) fab.className=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-login','pg-profile','pg-rpt','pg-dash','pg-all','pg-mine','pg-apv','pg-acc','pg-wip','pg-usr'].includes(id)?'fab hide':'fab';
   if(id==='pg-dash') loadDash();
   if(id==='pg-all'){initAllYear();loadAll();}
   if(id==='pg-mine'){initMineYear();loadMine();}
