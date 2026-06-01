@@ -846,10 +846,11 @@ function fdatetime(d){
   const dt=parseDate(d);
   if(!dt||isNaN(dt))return'-';
   const dateStr=dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
-  const h=String(dt.getHours()).padStart(2,'0');
-  const m=String(dt.getMinutes()).padStart(2,'0');
-  if(h==='00'&&m==='00') return dateStr;
-  return dateStr+' '+h+':'+m+' น.';
+  const h=dt.getHours(), m=dt.getMinutes();
+  if(h===0&&m===0) return dateStr;
+  const hh=String(h).padStart(2,'0');
+  const mm=String(m).padStart(2,'0');
+  return dateStr+' '+hh+'.'+mm+' น.';
 }
 
 function renderList(cid,data){
