@@ -827,8 +827,27 @@ async function loadDash(){
 const TAGS={'แจ้งซ่อม':'tag-new','อนุมัติ':'tag-ok','ไม่อนุมัติ':'tag-no','ช่างรับงาน':'tag-acc','กำลังดำเนินการ':'tag-wip','เสร็จสิ้น':'tag-done'};
 const LCOLOR={'แจ้งซ่อม':'#1976D2','อนุมัติ':'#2E7D32','ไม่อนุมัติ':'#C62828','ช่างรับงาน':'#E65100','กำลังดำเนินการ':'#6A1B9A','เสร็จสิ้น':'#00695C'};
 const UCLS={'สูงมาก':'u1','สูง':'u2','ปานกลาง':'u3','ต่ำ':'u4'};
-function fdate(d){if(!d)return'-';return new Date(d).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});}
-function fdatetime(d){if(!d)return'-';const dt=new Date(d);return dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'})+' '+dt.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}
+function parseDate(d){
+  if(!d) return null;
+  // datetime-local format: "2026-06-02T08:00" or "2026-06-02T08:00:00"
+  // parse manually to avoid UTC offset issue
+  if(typeof d==='string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(d)){
+    const p=d.split(/[T:\-]/);
+    return new Date(+p[0],+p[1]-1,+p[2],+p[3],+p[4]||0,+p[5]||0);
+  }
+  return new Date(d);
+}
+function fdate(d){if(!d)return'-';return parseDate(d).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});}
+function fdatetime(d){
+  if(!d)return'-';
+  const dt=parseDate(d);
+  const dateStr=dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
+  const h=String(dt.getHours()).padStart(2,'0');
+  const m=String(dt.getMinutes()).padStart(2,'0');
+  // แสดงเวลาเฉพาะเมื่อไม่ใช่ 00:00
+  if(h==='00'&&m==='00') return dateStr;
+  return dateStr+' '+h+':'+m+' น.';
+}
 
 function renderList(cid,data){
   const el=$(cid);
