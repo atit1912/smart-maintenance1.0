@@ -369,7 +369,7 @@ body.dark .notif-title{color:#E0E0E0}
       <div class="fg"><label class="fl">วันที่และเวลาเข้าซ่อมได้ <span class="req">*</span></label><input id="r-avail" type="datetime-local" class="fc"></div>
       <div class="fg"><label class="fl">วันที่และเวลาต้องการให้เสร็จ <span class="req">*</span></label><input id="r-end" type="datetime-local" class="fc"></div>
       <div class="fg"><label class="fl">หมวดหมู่งาน <span class="req">*</span></label><select id="r-cat" class="fc"></select></div>
-      <div class="fg"><label class="fl">สถานะ <span class="req">*</span></label><select id="r-mach" class="fc"></select></div>
+      <div class="fg"><label class="fl">สถานะเครื่องจักร <span class="req">*</span></label><select id="r-mach" class="fc"></select></div>
       <div class="fg"><label class="fl">รายละเอียด / สถานที่ <span class="req">*</span></label><textarea id="r-det" class="fc" placeholder="อธิบายปัญหาและสถานที่"></textarea></div>
       <div class="fg">
         <label class="fl">รูปภาพ <span class="req">*</span></label>
@@ -827,8 +827,30 @@ async function loadDash(){
 const TAGS={'แจ้งซ่อม':'tag-new','อนุมัติ':'tag-ok','ไม่อนุมัติ':'tag-no','ช่างรับงาน':'tag-acc','กำลังดำเนินการ':'tag-wip','เสร็จสิ้น':'tag-done'};
 const LCOLOR={'แจ้งซ่อม':'#1976D2','อนุมัติ':'#2E7D32','ไม่อนุมัติ':'#C62828','ช่างรับงาน':'#E65100','กำลังดำเนินการ':'#6A1B9A','เสร็จสิ้น':'#00695C'};
 const UCLS={'สูงมาก':'u1','สูง':'u2','ปานกลาง':'u3','ต่ำ':'u4'};
-function fdate(d){if(!d)return'-';return new Date(d).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});}
-function fdatetime(d){if(!d)return'-';const dt=new Date(d);return dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'})+' '+dt.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}
+function parseDate(d){
+  if(!d) return null;
+  if(d instanceof Date) return d;
+  const s = String(d).trim();
+  // datetime-local: "2026-06-02T08:00" or "2026-06-02T08:00:00"
+  if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)){
+    const p=s.split(/[T:\-]/);
+    return new Date(+p[0],+p[1]-1,+p[2],+p[3],+p[4]||0,0);
+  }
+  // GAS Date.toString(): "Mon Jun 02 2026 08:00:00 GMT+0700 (Indochina Time)"
+  // or ISO: "2026-06-02T01:00:00.000Z"
+  return new Date(s);
+}
+function fdate(d){if(!d)return'-';const dt=parseDate(d);if(!dt||isNaN(dt))return'-';return dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});}
+function fdatetime(d){
+  if(!d)return'-';
+  const dt=parseDate(d);
+  if(!dt||isNaN(dt))return'-';
+  const dateStr=dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
+  const h=String(dt.getHours()).padStart(2,'0');
+  const m=String(dt.getMinutes()).padStart(2,'0');
+  if(h==='00'&&m==='00') return dateStr;
+  return dateStr+' '+h+':'+m+' น.';
+}
 
 function renderList(cid,data){
   const el=$(cid);
@@ -901,6 +923,7 @@ function renderDet(r){
   $('det-title').textContent=r.request_id;
   const apv=hasRole('Approver')||hasRole('Admin');
   const tec=hasRole('Technician')||hasRole('Admin');
+  const adm=hasRole('Admin');
   const canApv=apv&&r.current_status==='แจ้งซ่อม';
   const canAcc=tec&&r.current_status==='อนุมัติ';
   const canStart=tec&&r.current_status==='ช่างรับงาน';
@@ -946,19 +969,38 @@ function renderDet(r){
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
         <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--muted)">หน่วยงาน</div><div style="font-size:13px;font-weight:500;margin-top:2px">${r.department}</div></div>
         <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--muted)">หมวดหมู่</div><div style="font-size:13px;font-weight:500;margin-top:2px">${r.work_category}</div></div>
-        <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--muted)">เข้าซ่อมได้</div><div style="font-size:13px;font-weight:500;margin-top:2px">${fdate(r.available_repair_date)}</div></div>
-        <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--muted)">ต้องเสร็จ</div><div style="font-size:13px;font-weight:500;margin-top:2px">${fdate(r.required_finish_date)}</div></div>
+        <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--muted)">เข้าซ่อมได้</div><div style="font-size:13px;font-weight:500;margin-top:2px">${fdatetime(r.available_repair_date)}</div></div>
+        <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--muted)">ต้องเสร็จ</div><div style="font-size:13px;font-weight:500;margin-top:2px">${fdatetime(r.required_finish_date)}</div></div>
       </div>
       <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--muted)">สถานะเครื่องจักร</div><div style="font-size:13px;font-weight:500;margin-top:2px">${r.machine_status}</div></div>
     </div></div>
     <div class="card"><div class="card-p"><div class="sec" style="margin-bottom:12px">ประวัติการดำเนินงาน</div>${tlHtml}</div></div>
-    ${cost}${ratingHtml}`;
+    ${cost}${ratingHtml}
+    ${adm?`<div class="card mt12"><div class="card-p">
+      <div class="sec" style="margin-bottom:8px;color:var(--red)">⚠️ Admin Zone</div>
+      <button class="btn btn-ghost-red" onclick="doDeleteReq('${r.request_id}')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        ลบงานนี้ออกจากระบบ
+      </button>
+    </div></div>`:''}`;
+
 }
 
 async function doApprove(id){if(!confirm('ยืนยันอนุมัติงาน '+id+'?'))return;ld('กำลังอนุมัติ...');try{const r=await api({action:'approveRequest',request_id:id});toast(r.message,r.success?'ok':'er');if(r.success)back();}finally{ul();}}
 async function doReject(id){const rm=prompt('เหตุผลที่ไม่อนุมัติ:');if(rm===null)return;ld();try{const r=await api({action:'rejectRequest',request_id:id,remark:rm});toast(r.message,r.success?'ok':'er');if(r.success)back();}finally{ul();}}
 async function doAccept(id){if(!confirm('รับงาน '+id+'?'))return;ld();try{const r=await api({action:'acceptRequest',request_id:id});toast(r.message,r.success?'ok':'er');if(r.success)openDet(id);}finally{ul();}}
 async function doStart(id){if(!confirm('เริ่มดำเนินการ '+id+'?'))return;ld();try{const r=await api({action:'startWork',request_id:id});toast(r.message,r.success?'ok':'er');if(r.success)openDet(id);}finally{ul();}}
+async function doDeleteReq(id){
+  if(!confirm('⚠️ ลบงาน '+id+' ?\n\nการลบจะไม่สามารถกู้คืนได้'))return;
+  if(!confirm('ยืนยันอีกครั้ง — ลบถาวร!\nงาน: '+id))return;
+  ld('กำลังลบ...');
+  try{
+    const r=await api({action:'deleteRequest',request_id:id});
+    toast(r.message,r.success?'ok':'er');
+    if(r.success){back();loadDash();}
+  }catch(e){toast('เกิดข้อผิดพลาด','er');}
+  finally{ul();}
+}
 function gotoClose(id){
   $('cl-id').textContent='ปิดงานเลขที่: '+id;$('cl-rid').value=id;$('cl-det').value='';
   $('cl-p').value=0;$('cl-l').value=0;$('cl-o').value=0;calcCost();removeCloseImg();go('pg-close');
