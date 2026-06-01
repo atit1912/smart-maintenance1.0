@@ -829,22 +829,25 @@ const LCOLOR={'แจ้งซ่อม':'#1976D2','อนุมัติ':'#2E7
 const UCLS={'สูงมาก':'u1','สูง':'u2','ปานกลาง':'u3','ต่ำ':'u4'};
 function parseDate(d){
   if(!d) return null;
-  // datetime-local format: "2026-06-02T08:00" or "2026-06-02T08:00:00"
-  // parse manually to avoid UTC offset issue
-  if(typeof d==='string' && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(d)){
-    const p=d.split(/[T:\-]/);
-    return new Date(+p[0],+p[1]-1,+p[2],+p[3],+p[4]||0,+p[5]||0);
+  if(d instanceof Date) return d;
+  const s = String(d).trim();
+  // datetime-local: "2026-06-02T08:00" or "2026-06-02T08:00:00"
+  if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)){
+    const p=s.split(/[T:\-]/);
+    return new Date(+p[0],+p[1]-1,+p[2],+p[3],+p[4]||0,0);
   }
-  return new Date(d);
+  // GAS Date.toString(): "Mon Jun 02 2026 08:00:00 GMT+0700 (Indochina Time)"
+  // or ISO: "2026-06-02T01:00:00.000Z"
+  return new Date(s);
 }
-function fdate(d){if(!d)return'-';return parseDate(d).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});}
+function fdate(d){if(!d)return'-';const dt=parseDate(d);if(!dt||isNaN(dt))return'-';return dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});}
 function fdatetime(d){
   if(!d)return'-';
   const dt=parseDate(d);
+  if(!dt||isNaN(dt))return'-';
   const dateStr=dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});
   const h=String(dt.getHours()).padStart(2,'0');
   const m=String(dt.getMinutes()).padStart(2,'0');
-  // แสดงเวลาเฉพาะเมื่อไม่ใช่ 00:00
   if(h==='00'&&m==='00') return dateStr;
   return dateStr+' '+h+':'+m+' น.';
 }
@@ -930,7 +933,6 @@ function renderDet(r){
   if(canAcc)act+=`<button class="btn btn-blue mb12" onclick="doAccept('${r.request_id}')">รับงาน</button>`;
   if(canStart)act+=`<button class="btn btn-orange mb12" onclick="doStart('${r.request_id}')">เริ่มดำเนินการ</button>`;
   if(canClose)act+=`<button class="btn btn-green mb12" onclick="gotoClose('${r.request_id}')">ปิดงาน</button>`;
-  if(adm)act+=`<button class="btn btn-ghost-red mb12" onclick="doDeleteReq('${r.request_id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg> ลบงานนี้ (Admin)</button>`;
   const cost=r.current_status==='เสร็จสิ้น'?`<div class="card"><div class="card-p"><div class="sec" style="margin-bottom:10px">ค่าใช้จ่าย</div><div class="crow"><span>ค่าอะไหล่</span><span>${(+r.cost_part||0).toLocaleString()} บาท</span></div><div class="crow"><span>ค่าแรง</span><span>${(+r.cost_labor||0).toLocaleString()} บาท</span></div><div class="crow"><span>ค่าอื่นๆ</span><span>${(+r.cost_other||0).toLocaleString()} บาท</span></div><div class="crow tot"><span>รวม</span><span style="color:var(--blue)">${(+r.total_cost||0).toLocaleString()} บาท</span></div></div></div>`:'';
   const canRate=r.current_status==='เสร็จสิ้น'&&r.created_by===sess.user.username&&!r.rating_score;
   const ratingHtml=canRate?`<div class="card mt12"><div class="card-p"><div class="sec" style="margin-bottom:10px">⭐ ให้คะแนนการซ่อม</div><div style="display:flex;gap:8px;justify-content:center;padding:8px 0" id="star-rating"><span onclick="setDetRating(1)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(2)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(3)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(4)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(5)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span></div><div id="det-rating-label" style="text-align:center;font-size:13px;color:var(--muted)">ยังไม่ได้ให้คะแนน</div><input type="hidden" id="det-rating-val" value="0"><input type="hidden" id="det-rating-rid" value="${r.request_id}"><button class="btn btn-orange mt12" onclick="submitRating()">ส่งคะแนน</button></div></div>`:'';
@@ -973,7 +975,15 @@ function renderDet(r){
       <div style="background:var(--blue-light);border-radius:8px;padding:8px 10px"><div style="font-size:11px;color:var(--muted)">สถานะเครื่องจักร</div><div style="font-size:13px;font-weight:500;margin-top:2px">${r.machine_status}</div></div>
     </div></div>
     <div class="card"><div class="card-p"><div class="sec" style="margin-bottom:12px">ประวัติการดำเนินงาน</div>${tlHtml}</div></div>
-    ${cost}${ratingHtml}`;
+    ${cost}${ratingHtml}
+    ${adm?`<div class="card mt12"><div class="card-p">
+      <div class="sec" style="margin-bottom:8px;color:var(--red)">⚠️ Admin Zone</div>
+      <button class="btn btn-ghost-red" onclick="doDeleteReq('${r.request_id}')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        ลบงานนี้ออกจากระบบ
+      </button>
+    </div></div>`:''}`;
+
 }
 
 async function doApprove(id){if(!confirm('ยืนยันอนุมัติงาน '+id+'?'))return;ld('กำลังอนุมัติ...');try{const r=await api({action:'approveRequest',request_id:id});toast(r.message,r.success?'ok':'er');if(r.success)back();}finally{ul();}}
