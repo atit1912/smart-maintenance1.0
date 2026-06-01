@@ -831,17 +831,12 @@ function parseDate(d){
   if(!d) return null;
   if(d instanceof Date) return d;
   const s = String(d).trim();
-  // datetime-local จาก input: "2026-06-02T08:00" ไม่มี Z → parse ตรงๆ เป็น local time
-  if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s) && !s.endsWith('Z')){
+  // datetime-local จาก input: "2026-06-02T08:00" ไม่มี timezone → parse เป็น local time ตรงๆ
+  if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s) && !s.endsWith('Z') && !/[+-]\d{2}:?\d{2}$/.test(s)){
     const p=s.split(/[T:\-]/);
     return new Date(+p[0],+p[1]-1,+p[2],+p[3],+p[4]||0,0);
   }
-  // ISO Z จาก GAS: "2026-06-02T01:00:00.000Z" → บวก 7 ชม. เพื่อให้ได้เวลาไทย
-  if(s.endsWith('Z') || /\+00:00$/.test(s)){
-    const dt = new Date(s);
-    return new Date(dt.getTime() + 7*60*60*1000);
-  }
-  // GAS Date.toString(): "Mon Jun 02 2026 08:00:00 GMT+0700" → parse ปกติ browser จัดการได้
+  // ทุก format อื่น (ISO Z, GMT+0700 ฯลฯ) ให้ browser parse เอง แล้วใช้ getHours() ซึ่ง local time อยู่แล้ว
   return new Date(s);
 }
 function fdate(d){if(!d)return'-';const dt=parseDate(d);if(!dt||isNaN(dt))return'-';return dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});}
