@@ -1072,51 +1072,58 @@ async function loadRpt(){
       const pend=d.filter(x=>x.current_status!=='เสร็จสิ้น'&&x.current_status!=='ไม่อนุมัติ').length;
       const cost=(s?.total_cost||d.reduce((a,x)=>a+(+x.total_cost||0),0));
       $('rpt-sum').innerHTML=`<div class="scard s0" style="cursor:default"><div class="snum">${d.length}</div><div class="slbl">ทั้งหมด</div></div><div class="scard s1" style="cursor:default"><div class="snum">${done}</div><div class="slbl">เสร็จสิ้น</div></div><div class="scard s3" style="cursor:default"><div class="snum">${pend}</div><div class="slbl">ค้างอยู่</div></div><div class="scard" style="cursor:default"><div class="snum" style="font-size:20px;color:var(--orange)">${cost.toLocaleString()}</div><div class="slbl">ค่าใช้จ่าย (฿)</div></div>`;
-      const byDept=(()=>{if(s?.by_department&&Object.keys(s.by_department).length>0)return s.by_department;const bd={};d.filter(x=>x.current_status==='เสร็จสิ้น').forEach(x=>{if(!bd[x.department])bd[x.department]={count:0,total:0};bd[x.department].count++;bd[x.department].total+=(+x.total_cost||0);});return bd;})();
-      const deptKeys=Object.keys(byDept);
+      // DONUT: นับจำนวนงานทุกสถานะ (ไม่ว่าจะอนุมัติหรือไม่)
+      const byDeptCount={};
+      d.forEach(x=>{if(!byDeptCount[x.department])byDeptCount[x.department]={count:0};byDeptCount[x.department].count++;});
+      // BAR: ยังเป็นเงินเหมือนเดิม (เฉพาะงานเสร็จ)
+      const byDeptCost=(()=>{if(s?.by_department&&Object.keys(s.by_department).length>0)return s.by_department;const bd={};d.filter(x=>x.current_status==='เสร็จสิ้น').forEach(x=>{if(!bd[x.department])bd[x.department]={count:0,total:0};bd[x.department].count++;bd[x.department].total+=(+x.total_cost||0);});return bd;})();
+      const deptKeys=Object.keys(byDeptCount);
       if(deptKeys.length>0){
-        const deptVals=deptKeys.map(k=>byDept[k].total);
-        const total=deptVals.reduce((a,b)=>a+b,0);
+        const donutVals=deptKeys.map(k=>byDeptCount[k].count);
+        const totalJobs=donutVals.reduce((a,b)=>a+b,0);
+        const barVals=deptKeys.map(k=>byDeptCost[k]?.total||0);
         const colors=['#1976D2','#E65100','#2E7D32','#6A1B9A','#00695C','#C62828','#F9A825','#0288D1'];
         const assignedColors=deptKeys.map((_,i)=>colors[i%colors.length]);
 
-        // legend
-        const legendHtml=deptKeys.map((k,i)=>`<span style="display:flex;align-items:center;gap:4px;font-size:11px;color:#424242"><span style="width:10px;height:10px;border-radius:2px;background:${assignedColors[i]};flex-shrink:0"></span>${k} ${Math.round(deptVals[i]/total*100)}%</span>`).join('');
+        // legend แสดง % จำนวนงาน
+        const legendHtml=deptKeys.map((k,i)=>`<span style="display:flex;align-items:center;gap:4px;font-size:11px;color:#424242"><span style="width:10px;height:10px;border-radius:2px;background:${assignedColors[i]};flex-shrink:0"></span>${k} ${Math.round(donutVals[i]/totalJobs*100)}%</span>`).join('');
 
         $('rpt-sum').innerHTML+=`<div class="card" style="grid-column:1/-1"><div class="card-p">
-          <div class="sec" style="margin-bottom:12px">ค่าใช้จ่ายตามหน่วยงาน</div>
+          <div class="sec" style="margin-bottom:12px">จำนวนงานตามหน่วยงาน</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">${legendHtml}</div>
           <div style="position:relative;width:100%;height:280px;margin-bottom:20px">
-            <canvas id="rpt-donut" role="img" aria-label="Donut chart department cost"></canvas>
+            <canvas id="rpt-donut" role="img" aria-label="Donut chart department job count"></canvas>
           </div>
+          <div class="sec" style="margin-bottom:8px;margin-top:4px">ค่าใช้จ่ายตามหน่วยงาน (฿)</div>
           <div style="position:relative;width:100%;height:240px">
             <canvas id="rpt-bar" role="img" aria-label="Bar chart department cost in baht"></canvas>
           </div>
         </div></div>`;
 
-        // destroy old charts
         if(_rptDonutChart){_rptDonutChart.destroy();_rptDonutChart=null;}
         if(_rptBarChart){_rptBarChart.destroy();_rptBarChart=null;}
 
         if(typeof Chart!=='undefined'&&typeof ChartDataLabels!=='undefined'){
           Chart.register(ChartDataLabels);
+
+          // DONUT: จำนวนงาน
           _rptDonutChart=new Chart($('rpt-donut'),{
             type:'doughnut',
-            data:{labels:deptKeys,datasets:[{data:deptVals,backgroundColor:assignedColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
+            data:{labels:deptKeys,datasets:[{data:donutVals,backgroundColor:assignedColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
             options:{
               responsive:true,maintainAspectRatio:false,cutout:'48%',
               layout:{padding:30},
               plugins:{
                 legend:{display:false},
-                tooltip:{callbacks:{label:ctx=>{const pct=Math.round(ctx.parsed/total*100);return ` ${ctx.label}: ${ctx.parsed.toLocaleString()} ฿ (${pct}%)`;}}} ,
+                tooltip:{callbacks:{label:ctx=>{const pct=Math.round(ctx.parsed/totalJobs*100);return ` ${ctx.label}: ${ctx.parsed} งาน (${pct}%)`;}}} ,
                 datalabels:{
                   display:true,anchor:'end',align:'end',offset:4,
                   color:(_ctx)=>assignedColors[_ctx.dataIndex],
                   font:{size:9,weight:'500'},
                   textAlign:'center',
                   formatter:(value,ctx)=>{
-                    const pct=Math.round(value/total*100);
-                    return pct+'%\n'+value.toLocaleString()+'฿';
+                    const pct=Math.round(value/totalJobs*100);
+                    return pct+'%\n'+value+' งาน';
                   }
                 }
               }
@@ -1126,13 +1133,15 @@ async function loadRpt(){
               const cx=(left+right)/2,cy=(top+bottom)/2;
               ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
               ctx.fillStyle='#757575';ctx.font='10px sans-serif';ctx.fillText('รวม',cx,cy-8);
-              ctx.fillStyle='#1976D2';ctx.font='500 12px sans-serif';ctx.fillText(total.toLocaleString()+' ฿',cx,cy+8);
+              ctx.fillStyle='#1976D2';ctx.font='bold 13px sans-serif';ctx.fillText(totalJobs+' งาน',cx,cy+8);
               ctx.restore();
             }}]
           });
+
+          // BAR: ค่าใช้จ่าย (เหมือนเดิม)
           _rptBarChart=new Chart($('rpt-bar'),{
             type:'bar',
-            data:{labels:deptKeys,datasets:[{data:deptVals,backgroundColor:assignedColors,borderRadius:5,borderSkipped:false}]},
+            data:{labels:deptKeys,datasets:[{data:barVals,backgroundColor:assignedColors,borderRadius:5,borderSkipped:false}]},
             options:{
               responsive:true,maintainAspectRatio:false,
               plugins:{
@@ -1405,5 +1414,5 @@ window.addEventListener('load',()=>{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 </body>
-<!-- v5 -->
+<!-- v6-donut-jobcount -->
 </html>
