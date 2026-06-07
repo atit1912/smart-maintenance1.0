@@ -144,6 +144,33 @@ select.fc{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='
 #toast.er{background:var(--red)}
 .divider{height:1px;background:var(--border);margin:12px 0}
 .mt8{margin-top:8px}.mt12{margin-top:12px}.mb12{margin-bottom:12px}
+
+/* ============================================
+   SMART BANNER — ข้อ 1/2/3
+   ============================================ */
+.smart-banner{border-radius:10px;padding:12px 14px;margin-bottom:12px;display:flex;align-items:flex-start;gap:10px;border-left:4px solid;animation:bannerIn .25s ease}
+@keyframes bannerIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.smart-banner svg{width:20px;height:20px;flex-shrink:0;margin-top:2px;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.smart-banner-content{flex:1;font-size:13px;line-height:1.5}
+.smart-banner-title{font-weight:600;font-size:14px;margin-bottom:3px}
+.smart-banner-jobs{display:flex;flex-direction:column;gap:4px;margin-top:6px}
+.smart-banner-job{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,0.65);border-radius:6px;padding:6px 10px;cursor:pointer;font-size:13px;transition:opacity .15s}
+.smart-banner-job:active{opacity:.7}
+/* สี แต่ละ type */
+.sb-apv{background:#E8F5E9;color:#1B5E20;border-color:#2E7D32}
+.sb-acc{background:#FFF3E0;color:#BF360C;border-color:#E65100}
+.sb-rat{background:#FFF8E1;color:#E65100;border-color:#F9A825}
+.sb-wip{background:#F3E5F5;color:#4A148C;border-color:#6A1B9A}
+.sb-over{background:#FFEBEE;color:#B71C1C;border-color:#C62828}
+
+/* dark mode */
+body.dark .smart-banner-job{background:rgba(255,255,255,0.08)}
+body.dark .sb-apv{background:#0D2A1A;color:#A5D6A7;border-color:#2E7D32}
+body.dark .sb-acc{background:#2A1A0D;color:#FFCC80;border-color:#E65100}
+body.dark .sb-rat{background:#2A2000;color:#FFE082;border-color:#F9A825}
+body.dark .sb-wip{background:#1A0D2A;color:#CE93D8;border-color:#6A1B9A}
+body.dark .sb-over{background:#2A0D0D;color:#EF9A9A;border-color:#C62828}
+
 body.dark{background:#121212;color:#E0E0E0}
 body.dark .card,body.dark .ri,body.dark .uchip,body.dark .scard,body.dark .tabs,body.dark .srch{background:#1E1E1E;border-color:#333}
 body.dark .mitem{background:#1E1E1E;border-color:#333}
@@ -291,7 +318,6 @@ body.dark .notif-title{color:#E0E0E0}
       </button>
     </div>
     <div class="body">
-      <!-- pbanner ไม่มีปุ่ม + แจ้งซ่อม -->
       <div class="pbanner">
         <div class="pav" id="d-av" style="font-size:22px">🐯</div>
         <div>
@@ -299,6 +325,8 @@ body.dark .notif-title{color:#E0E0E0}
           <div class="prole" id="d-role">-</div>
         </div>
       </div>
+      <!-- ข้อ 3: rating banner จะแทรกตรงนี้ -->
+      <div id="rating-banner"></div>
       <div class="sec">สรุปสถานะงาน</div>
       <div class="sgrid">
         <div class="scard s0" onclick="goFilter('แจ้งซ่อม')"><div class="snum" id="s0">-</div><div class="slbl">แจ้งซ่อม</div></div>
@@ -322,7 +350,8 @@ body.dark .notif-title{color:#E0E0E0}
           <svg viewBox="0 0 24 24" stroke="var(--purple)"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           <span>งานของฉัน</span>
         </button>
-        <button class="mitem" id="m-apv" onclick="go('pg-apv')" style="display:none">
+        <!-- ข้อ 1: ปุ่มอนุมัติใช้ smartGoApv() แทน go() -->
+        <button class="mitem" id="m-apv" onclick="smartGoApv()" style="display:none">
           <div style="position:relative">
             <svg viewBox="0 0 24 24" stroke="var(--green)" width="28" height="28" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
             <div id="badge-apv" style="display:none;position:absolute;top:-6px;right:-6px;background:#C62828;color:#fff;font-size:9px;font-weight:700;width:16px;height:16px;border-radius:50%;align-items:center;justify-content:center">0</div>
@@ -435,22 +464,31 @@ body.dark .notif-title{color:#E0E0E0}
     </div>
   </div>
 
-  <!-- PENDING APPROVAL -->
+  <!-- PENDING APPROVAL — ข้อ 1: เพิ่ม apv-banner -->
   <div class="page" id="pg-apv">
     <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">งานรออนุมัติ</span><button class="bar-btn" onclick="loadApv()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button></div>
-    <div class="body"><div id="ls-apv"></div></div>
+    <div class="body">
+      <div id="apv-banner"></div>
+      <div id="ls-apv"></div>
+    </div>
   </div>
 
-  <!-- PENDING ACCEPT -->
+  <!-- PENDING ACCEPT — ข้อ 2: เพิ่ม acc-banner -->
   <div class="page" id="pg-acc">
     <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">งานรอรับ</span><button class="bar-btn" onclick="loadAcc()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button></div>
-    <div class="body"><div id="ls-acc"></div></div>
+    <div class="body">
+      <div id="acc-banner"></div>
+      <div id="ls-acc"></div>
+    </div>
   </div>
 
-  <!-- IN PROGRESS -->
+  <!-- IN PROGRESS — ข้อ 2: เพิ่ม wip-banner -->
   <div class="page" id="pg-wip">
     <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">กำลังดำเนินการ</span><button class="bar-btn" onclick="loadWip()"><svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg></button></div>
-    <div class="body"><div id="ls-wip"></div></div>
+    <div class="body">
+      <div id="wip-banner"></div>
+      <div id="ls-wip"></div>
+    </div>
   </div>
 
   <!-- DETAIL -->
@@ -779,6 +817,32 @@ function setupMenus(){
   $('m-usr').style.display=adm?'flex':'none';
   $('m-set').style.display=adm?'flex':'none';
 }
+
+/* ============================================================
+   ข้อ 1: smartGoApv — Smart Redirect สำหรับปุ่มอนุมัติงาน
+   ============================================================ */
+async function smartGoApv(){
+  ld('กำลังตรวจสอบ...');
+  try{
+    const r=await api({action:'getPendingApproval'});
+    ul();
+    if(!r.success){toast(r.message,'er');return;}
+    if(r.data.length===0){
+      toast('ไม่มีงานรออนุมัติ ✓');
+      return;
+    }
+    if(r.data.length===1){
+      // งานเดียว → ข้ามหน้า list ไปหน้า detail เลย
+      // push pg-apv ใน hist เพื่อให้กด Back กลับมาได้
+      hist.push('pg-apv');
+      openDet(r.data[0].request_id);
+    } else {
+      // หลายงาน → ไปหน้า list พร้อม banner
+      go('pg-apv');
+    }
+  }catch(e){ul();toast('ไม่สามารถเชื่อมต่อได้','er');}
+}
+
 async function loadMaster(retry=0){
   try{
     const r=await api({action:'getMasterData'});
@@ -811,9 +875,13 @@ async function submitRating(){
   const rid=document.getElementById('det-rating-rid').value;
   if(!score||score==='0'){toast('กรุณาเลือกคะแนนก่อน','er');return;}
   ld('กำลังส่งคะแนน...');
-  try{const r=await api({action:'rateRequest',request_id:rid,rating_score:score});toast(r.message,r.success?'ok':'er');if(r.success)openDet(rid);}
+  try{const r=await api({action:'rateRequest',request_id:rid,rating_score:score});toast(r.message,r.success?'ok':'er');if(r.success){_ratingBannerShown=false;openDet(rid);}}
   finally{ul();}
 }
+
+/* ============================================================
+   ข้อ 3: loadDash + checkRatingBanner
+   ============================================================ */
 async function loadDash(){
   updateSmartHeader();refreshBellBadge();updateMenuBadges();
   const u=sess.user;
@@ -823,7 +891,56 @@ async function loadDash(){
   try{const r=await api({action:'getDashboardStats'});
     if(r.success){const s=r.data;$('s0').textContent=s.new||0;$('s1').textContent=s.approved||0;$('s2').textContent=s.rejected||0;$('s3').textContent=s.accepted||0;$('s4').textContent=s.in_progress||0;$('s5').textContent=s.done||0;}
   }catch(e){}
+  // เช็ค rating banner (ข้อ 3)
+  checkRatingBanner();
 }
+
+let _ratingBannerShown=false;
+async function checkRatingBanner(){
+  const banner=$('rating-banner');
+  if(!banner)return;
+  // dismiss แล้วใน session นี้ → ไม่แสดง
+  if(_ratingBannerShown){banner.innerHTML='';return;}
+  try{
+    const rm=await api({action:'getMyRequests'});
+    if(!rm.success)return;
+    // กรองเฉพาะงานของตัวเอง เสร็จแล้ว และยังไม่ให้คะแนน
+    const toRate=rm.data.filter(d=>
+      d.current_status==='เสร็จสิ้น' &&
+      !d.rating_score &&
+      d.created_by===sess.user.username
+    );
+    if(toRate.length===0){banner.innerHTML='';return;}
+    // แสดง banner
+    const jobsHtml=toRate.slice(0,3).map(d=>`
+      <div class="smart-banner-job" onclick="openDet('${d.request_id}')">
+        <span style="color:#E65100;font-weight:600">${d.request_id}</span>
+        <span style="font-size:12px;color:#757575">${d.work_category}</span>
+        <span style="font-size:13px">⭐</span>
+      </div>`).join('');
+    const moreHtml=toRate.length>3?`<div style="font-size:12px;color:#E65100;padding:4px 0 0">และอีก ${toRate.length-3} งาน...</div>`:'';
+    banner.innerHTML=`
+      <div class="smart-banner sb-rat" style="position:relative;margin-bottom:14px">
+        <svg viewBox="0 0 24 24" stroke="#F9A825"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+        <div class="smart-banner-content">
+          <div class="smart-banner-title">⭐ รอให้คะแนนการซ่อม ${toRate.length} งาน</div>
+          <div style="font-size:12px;margin-bottom:4px">งานซ่อมเสร็จแล้ว กรุณาให้คะแนนช่าง</div>
+          <div class="smart-banner-jobs">${jobsHtml}${moreHtml}</div>
+        </div>
+        <button onclick="dismissRatingBanner()" style="position:absolute;top:8px;right:8px;background:none;border:none;cursor:pointer;font-size:18px;color:#F9A825;padding:0;line-height:1">✕</button>
+      </div>`;
+  }catch(e){}
+}
+function dismissRatingBanner(){
+  _ratingBannerShown=true;
+  const banner=$('rating-banner');
+  if(banner){
+    banner.style.transition='opacity .2s';
+    banner.style.opacity='0';
+    setTimeout(()=>{banner.innerHTML='';banner.style.opacity='';},200);
+  }
+}
+
 const TAGS={'แจ้งซ่อม':'tag-new','อนุมัติ':'tag-ok','ไม่อนุมัติ':'tag-no','ช่างรับงาน':'tag-acc','กำลังดำเนินการ':'tag-wip','เสร็จสิ้น':'tag-done'};
 const LCOLOR={'แจ้งซ่อม':'#1976D2','อนุมัติ':'#2E7D32','ไม่อนุมัติ':'#C62828','ช่างรับงาน':'#E65100','กำลังดำเนินการ':'#6A1B9A','เสร็จสิ้น':'#00695C'};
 const UCLS={'สูงมาก':'u1','สูง':'u2','ปานกลาง':'u3','ต่ำ':'u4'};
@@ -831,12 +948,10 @@ function parseDate(d){
   if(!d) return null;
   if(d instanceof Date) return d;
   const s = String(d).trim();
-  // datetime-local จาก input: "2026-06-02T08:00" ไม่มี timezone → parse เป็น local time ตรงๆ
   if(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s) && !s.endsWith('Z') && !/[+-]\d{2}:?\d{2}$/.test(s)){
     const p=s.split(/[T:\-]/);
     return new Date(+p[0],+p[1]-1,+p[2],+p[3],+p[4]||0,0);
   }
-  // ทุก format อื่น (ISO Z, GMT+0700 ฯลฯ) ให้ browser parse เอง แล้วใช้ getHours() ซึ่ง local time อยู่แล้ว
   return new Date(s);
 }
 function fdate(d){if(!d)return'-';const dt=parseDate(d);if(!dt||isNaN(dt))return'-';return dt.toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'});}
@@ -897,9 +1012,174 @@ async function loadMine(){
     if(r.success){renderList('ls-mine',r.data);const yTh=(r.filtered_year||new Date().getFullYear())+543;$('mine-info').textContent='แสดง '+r.data.length+' งาน (ปี '+yTh+')';}
   }catch(e){}finally{ul();}
 }
-async function loadApv(){ld();try{const r=await api({action:'getPendingApproval'});if(r.success)renderList('ls-apv',r.data);else toast(r.message,'er');}catch(e){}finally{ul();}}
-async function loadAcc(){ld();try{const r=await api({action:'getPendingAccept'});if(r.success)renderList('ls-acc',r.data);}catch(e){}finally{ul();}}
-async function loadWip(){ld();try{const r=await api({action:'getInProgress'});if(r.success)renderList('ls-wip',r.data);}catch(e){}finally{ul();}}
+
+/* ============================================================
+   ข้อ 1: loadApv — Smart Redirect + Banner
+   ============================================================ */
+async function loadApv(){
+  ld();
+  try{
+    const r=await api({action:'getPendingApproval'});
+    if(r.success){
+      const data=r.data;
+      // Smart Redirect: งานเดียว → ข้ามหน้า list ไปหน้า detail ทันที
+      if(data.length===1){
+        ul();
+        if(hist[hist.length-1]!=='pg-apv')hist.push('pg-apv');
+        openDet(data[0].request_id);
+        return;
+      }
+      // render banner แจ้งจำนวน
+      const banner=$('apv-banner');
+      if(banner){
+        if(data.length===0){
+          banner.innerHTML='';
+        } else {
+          banner.innerHTML=`
+            <div class="smart-banner sb-apv">
+              <svg viewBox="0 0 24 24" stroke="#2E7D32"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              <div class="smart-banner-content">
+                <div class="smart-banner-title">มี ${data.length} งานรออนุมัติ</div>
+                <div style="font-size:12px">กดที่งานด้านล่างเพื่ออนุมัติหรือไม่อนุมัติ</div>
+              </div>
+            </div>`;
+        }
+      }
+      renderList('ls-apv',data);
+    } else toast(r.message,'er');
+  }catch(e){}finally{ul();}
+}
+
+/* ============================================================
+   ข้อ 2: loadAcc — Banner งานรอรับ + งานในมือ + due date
+   ============================================================ */
+async function loadAcc(){
+  ld();
+  try{
+    // ดึงทั้ง 2 API พร้อมกัน
+    const [rAcc,rWip]=await Promise.all([
+      api({action:'getPendingAccept'}),
+      api({action:'getInProgress'})
+    ]);
+    if(rAcc.success){
+      const accData=rAcc.data;
+      const wipData=rWip.success?rWip.data:[];
+      const now=new Date();
+
+      // Smart Redirect: รอรับงานเดียว + ไม่มี WIP → ไปหน้า detail เลย
+      if(accData.length===1&&wipData.length===0){
+        ul();
+        if(hist[hist.length-1]!=='pg-acc')hist.push('pg-acc');
+        openDet(accData[0].request_id);
+        return;
+      }
+
+      const banner=$('acc-banner');
+      if(banner){
+        let html='';
+
+        // Block 1: งานรอรับ
+        if(accData.length>0){
+          const jobRows=accData.slice(0,3).map(d=>`
+            <div class="smart-banner-job" onclick="openDet('${d.request_id}')">
+              <span style="color:#E65100;font-weight:600">${d.request_id}</span>
+              <span style="font-size:12px;color:#757575">${d.work_category}</span>
+              <span style="font-size:11px">▶</span>
+            </div>`).join('');
+          const moreAcc=accData.length>3?`<div style="font-size:12px;color:#E65100;padding:4px 0 0">และอีก ${accData.length-3} งาน...</div>`:'';
+          html+=`
+            <div class="smart-banner sb-acc">
+              <svg viewBox="0 0 24 24" stroke="#E65100"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+              <div class="smart-banner-content">
+                <div class="smart-banner-title">📋 รอรับงานใหม่ ${accData.length} งาน</div>
+                <div class="smart-banner-jobs">${jobRows}${moreAcc}</div>
+              </div>
+            </div>`;
+        }
+
+        // Block 2: งานในมือ + due date warning
+        if(wipData.length>0){
+          const overdue=wipData.filter(d=>d.required_finish_date&&(new Date(d.required_finish_date)-now)<0);
+          const neardue=wipData.filter(d=>{if(!d.required_finish_date)return false;const diff=(new Date(d.required_finish_date)-now)/(1000*60*60*24);return diff>=0&&diff<1;});
+          let wipCls='sb-wip',wipTitle=`🔧 งานในมือ ${wipData.length} งาน`;
+          if(overdue.length>0){wipCls='sb-over';wipTitle=`⚠️ เกินกำหนด ${overdue.length} งาน (รวม ${wipData.length} งานในมือ)`;}
+          else if(neardue.length>0){wipCls='sb-rat';wipTitle=`⏰ ใกล้ครบกำหนดวันนี้ ${neardue.length} งาน (รวม ${wipData.length} งานในมือ)`;}
+          const wipRows=wipData.slice(0,3).map(d=>{
+            const due=d.required_finish_date?new Date(d.required_finish_date):null;
+            const diff=due?(due-now)/(1000*60*60*24):null;
+            const dueStr=due?`ครบ ${fdate(d.required_finish_date)}`:'ไม่มีกำหนด';
+            const dueColor=diff!==null?(diff<0?'#C62828':diff<1?'#E65100':'#757575'):'#9E9E9E';
+            return`<div class="smart-banner-job" onclick="openDet('${d.request_id}')">
+              <span style="color:#6A1B9A;font-weight:600">${d.request_id}</span>
+              <span style="font-size:11px;color:${dueColor}">${dueStr}</span>
+              <span style="font-size:11px">▶</span>
+            </div>`;
+          }).join('');
+          const moreWip=wipData.length>3?`<div style="font-size:12px;color:#6A1B9A;padding:4px 0 0">และอีก ${wipData.length-3} งาน...</div>`:'';
+          html+=`
+            <div class="smart-banner ${wipCls}" style="margin-top:${accData.length>0?'0':'0'}">
+              <svg viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M17.66 17.66l-1.41-1.41M6.34 17.66l1.41-1.41"/></svg>
+              <div class="smart-banner-content">
+                <div class="smart-banner-title">${wipTitle}</div>
+                <div class="smart-banner-jobs">${wipRows}${moreWip}</div>
+              </div>
+            </div>`;
+        }
+        banner.innerHTML=html;
+      }
+      renderList('ls-acc',accData);
+    }
+  }catch(e){}finally{ul();}
+}
+
+/* ============================================================
+   ข้อ 2: loadWip — Banner งานในมือ + เตือน due date
+   ============================================================ */
+async function loadWip(){
+  ld();
+  try{
+    const r=await api({action:'getInProgress'});
+    if(r.success){
+      const data=r.data;
+      const banner=$('wip-banner');
+      if(banner){
+        if(data.length===0){
+          banner.innerHTML='';
+        } else {
+          const now=new Date();
+          const overdue=data.filter(d=>d.required_finish_date&&(new Date(d.required_finish_date)-now)<0);
+          const neardue=data.filter(d=>{if(!d.required_finish_date)return false;const diff=(new Date(d.required_finish_date)-now)/(1000*60*60*24);return diff>=0&&diff<1;});
+          let cls='sb-wip',title=`🔧 งานในมือทั้งหมด ${data.length} งาน`;
+          if(overdue.length>0){cls='sb-over';title=`⚠️ เกินกำหนด ${overdue.length} งาน จากทั้งหมด ${data.length} งาน`;}
+          else if(neardue.length>0){cls='sb-rat';title=`⏰ ใกล้ครบกำหนดวันนี้ ${neardue.length} งาน จากทั้งหมด ${data.length} งาน`;}
+          // แสดงงานเกินกำหนดก่อน ถ้าไม่มีค่อยแสดงทั้งหมด
+          const showList=overdue.length>0?overdue:data;
+          const rows=showList.slice(0,3).map(d=>{
+            const due=d.required_finish_date?new Date(d.required_finish_date):null;
+            const diff=due?(due-now)/(1000*60*60*24):null;
+            const dueStr=due?`ครบ ${fdate(d.required_finish_date)}`:'ไม่มีกำหนด';
+            const dueColor=diff!==null?(diff<0?'#C62828':diff<1?'#E65100':'#757575'):'#9E9E9E';
+            return`<div class="smart-banner-job" onclick="openDet('${d.request_id}')">
+              <span style="color:#6A1B9A;font-weight:600">${d.request_id}</span>
+              <span style="font-size:11px;color:${dueColor}">${dueStr}</span>
+              <span style="font-size:11px">▶</span>
+            </div>`;
+          }).join('');
+          const more=showList.length>3?`<div style="font-size:12px;padding:4px 0 0">และอีก ${showList.length-3} งาน...</div>`:'';
+          banner.innerHTML=`
+            <div class="smart-banner ${cls}">
+              <svg viewBox="0 0 24 24" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93l-1.41 1.41M4.93 4.93l1.41 1.41M12 2v2M12 20v2M20 12h2M2 12h2M17.66 17.66l-1.41-1.41M6.34 17.66l1.41-1.41"/></svg>
+              <div class="smart-banner-content">
+                <div class="smart-banner-title">${title}</div>
+                <div class="smart-banner-jobs">${rows}${more}</div>
+              </div>
+            </div>`;
+        }
+      }
+      renderList('ls-wip',data);
+    }
+  }catch(e){}finally{ul();}
+}
 
 function setTab(v,el,gid){
   if(gid==='tabs-all')allTab=v;else rptTab=v;
@@ -983,7 +1263,6 @@ function renderDet(r){
         ลบงานนี้ออกจากระบบ
       </button>
     </div></div>`:''}`;
-
 }
 
 async function doApprove(id){if(!confirm('ยืนยันอนุมัติงาน '+id+'?'))return;ld('กำลังอนุมัติ...');try{const r=await api({action:'approveRequest',request_id:id});toast(r.message,r.success?'ok':'er');if(r.success)back();}finally{ul();}}
@@ -1072,10 +1351,8 @@ async function loadRpt(){
       const pend=d.filter(x=>x.current_status!=='เสร็จสิ้น'&&x.current_status!=='ไม่อนุมัติ').length;
       const cost=(s?.total_cost||d.reduce((a,x)=>a+(+x.total_cost||0),0));
       $('rpt-sum').innerHTML=`<div class="scard s0" style="cursor:default"><div class="snum">${d.length}</div><div class="slbl">ทั้งหมด</div></div><div class="scard s1" style="cursor:default"><div class="snum">${done}</div><div class="slbl">เสร็จสิ้น</div></div><div class="scard s3" style="cursor:default"><div class="snum">${pend}</div><div class="slbl">ค้างอยู่</div></div><div class="scard" style="cursor:default"><div class="snum" style="font-size:20px;color:var(--orange)">${cost.toLocaleString()}</div><div class="slbl">ค่าใช้จ่าย (฿)</div></div>`;
-      // DONUT: นับจำนวนงานทุกสถานะ (ไม่ว่าจะอนุมัติหรือไม่)
       const byDeptCount={};
       d.forEach(x=>{if(!byDeptCount[x.department])byDeptCount[x.department]={count:0};byDeptCount[x.department].count++;});
-      // BAR: ยังเป็นเงินเหมือนเดิม (เฉพาะงานเสร็จ)
       const byDeptCost=(()=>{if(s?.by_department&&Object.keys(s.by_department).length>0)return s.by_department;const bd={};d.filter(x=>x.current_status==='เสร็จสิ้น').forEach(x=>{if(!bd[x.department])bd[x.department]={count:0,total:0};bd[x.department].count++;bd[x.department].total+=(+x.total_cost||0);});return bd;})();
       const deptKeys=Object.keys(byDeptCount);
       if(deptKeys.length>0){
@@ -1084,10 +1361,7 @@ async function loadRpt(){
         const barVals=deptKeys.map(k=>byDeptCost[k]?.total||0);
         const colors=['#1976D2','#E65100','#2E7D32','#6A1B9A','#00695C','#C62828','#F9A825','#0288D1'];
         const assignedColors=deptKeys.map((_,i)=>colors[i%colors.length]);
-
-        // legend แสดง % จำนวนงาน
         const legendHtml=deptKeys.map((k,i)=>`<span style="display:flex;align-items:center;gap:4px;font-size:11px;color:#424242"><span style="width:10px;height:10px;border-radius:2px;background:${assignedColors[i]};flex-shrink:0"></span>${k} ${Math.round(donutVals[i]/totalJobs*100)}%</span>`).join('');
-
         $('rpt-sum').innerHTML+=`<div class="card" style="grid-column:1/-1"><div class="card-p">
           <div class="sec" style="margin-bottom:12px">จำนวนงานตามหน่วยงาน</div>
           <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px">${legendHtml}</div>
@@ -1099,67 +1373,12 @@ async function loadRpt(){
             <canvas id="rpt-bar" role="img" aria-label="Bar chart department cost in baht"></canvas>
           </div>
         </div></div>`;
-
         if(_rptDonutChart){_rptDonutChart.destroy();_rptDonutChart=null;}
         if(_rptBarChart){_rptBarChart.destroy();_rptBarChart=null;}
-
         if(typeof Chart!=='undefined'&&typeof ChartDataLabels!=='undefined'){
           Chart.register(ChartDataLabels);
-
-          // DONUT: จำนวนงาน
-          _rptDonutChart=new Chart($('rpt-donut'),{
-            type:'doughnut',
-            data:{labels:deptKeys,datasets:[{data:donutVals,backgroundColor:assignedColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},
-            options:{
-              responsive:true,maintainAspectRatio:false,cutout:'48%',
-              layout:{padding:30},
-              plugins:{
-                legend:{display:false},
-                tooltip:{callbacks:{label:ctx=>{const pct=Math.round(ctx.parsed/totalJobs*100);return ` ${ctx.label}: ${ctx.parsed} งาน (${pct}%)`;}}} ,
-                datalabels:{
-                  display:true,anchor:'end',align:'end',offset:4,
-                  color:(_ctx)=>assignedColors[_ctx.dataIndex],
-                  font:{size:9,weight:'500'},
-                  textAlign:'center',
-                  formatter:(value,ctx)=>{
-                    const pct=Math.round(value/totalJobs*100);
-                    return pct+'%\n'+value+' งาน';
-                  }
-                }
-              }
-            },
-            plugins:[{id:'centerText',afterDraw(chart){
-              const {ctx,chartArea:{left,right,top,bottom}}=chart;
-              const cx=(left+right)/2,cy=(top+bottom)/2;
-              ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';
-              ctx.fillStyle='#757575';ctx.font='10px sans-serif';ctx.fillText('รวม',cx,cy-8);
-              ctx.fillStyle='#1976D2';ctx.font='bold 13px sans-serif';ctx.fillText(totalJobs+' งาน',cx,cy+8);
-              ctx.restore();
-            }}]
-          });
-
-          // BAR: ค่าใช้จ่าย (เหมือนเดิม)
-          _rptBarChart=new Chart($('rpt-bar'),{
-            type:'bar',
-            data:{labels:deptKeys,datasets:[{data:barVals,backgroundColor:assignedColors,borderRadius:5,borderSkipped:false}]},
-            options:{
-              responsive:true,maintainAspectRatio:false,
-              plugins:{
-                legend:{display:false},
-                datalabels:{display:false},
-                tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y.toLocaleString()} บาท`}}
-              },
-              scales:{
-                x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:45,font:{size:9},color:'#757575'}},
-                y:{
-                  grid:{color:'rgba(0,0,0,0.06)'},
-                  title:{display:true,text:'บาท (฿)',font:{size:10},color:'#757575'},
-                  ticks:{font:{size:9},color:'#757575',callback:v=>v.toLocaleString()+'฿'}
-                }
-              }
-            },
-            plugins:[ChartDataLabels]
-          });
+          _rptDonutChart=new Chart($('rpt-donut'),{type:'doughnut',data:{labels:deptKeys,datasets:[{data:donutVals,backgroundColor:assignedColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'48%',layout:{padding:30},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const pct=Math.round(ctx.parsed/totalJobs*100);return ` ${ctx.label}: ${ctx.parsed} งาน (${pct}%)`;}}} ,datalabels:{display:true,anchor:'end',align:'end',offset:4,color:(_ctx)=>assignedColors[_ctx.dataIndex],font:{size:9,weight:'500'},textAlign:'center',formatter:(value,ctx)=>{const pct=Math.round(value/totalJobs*100);return pct+'%\n'+value+' งาน';}}}},plugins:[{id:'centerText',afterDraw(chart){const {ctx,chartArea:{left,right,top,bottom}}=chart;const cx=(left+right)/2,cy=(top+bottom)/2;ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#757575';ctx.font='10px sans-serif';ctx.fillText('รวม',cx,cy-8);ctx.fillStyle='#1976D2';ctx.font='bold 13px sans-serif';ctx.fillText(totalJobs+' งาน',cx,cy+8);ctx.restore();}}]});
+          _rptBarChart=new Chart($('rpt-bar'),{type:'bar',data:{labels:deptKeys,datasets:[{data:barVals,backgroundColor:assignedColors,borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y.toLocaleString()} บาท`}}},scales:{x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:45,font:{size:9},color:'#757575'}},y:{grid:{color:'rgba(0,0,0,0.06)'},title:{display:true,text:'บาท (฿)',font:{size:10},color:'#757575'},ticks:{font:{size:9},color:'#757575',callback:v=>v.toLocaleString()+'฿'}}}},plugins:[ChartDataLabels]});
         }
       }
       renderList('rpt-ls',d);
@@ -1268,66 +1487,19 @@ function exportPDF(mLabel,yLabel){
   const badge=s=>`<span style="background:${TB[s]||'#eee'}!important;color:${TC[s]||'#333'};font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500">${s}</span>`;
   const listRows=expData.map((r,i)=>`<tr style="background:${i%2===0?'#ffffff':'#F9FAFB'}!important"><td style="color:#1976D2;font-weight:600">${r.request_id}</td><td>${r.created_at?new Date(r.created_at).toLocaleDateString('th-TH',{day:'2-digit',month:'short',year:'2-digit'}):''}</td><td>${r.requester_name||''}</td><td>${r.department||''}</td><td>${r.work_category||''}</td><td>${badge(r.current_status)}</td><td style="text-align:right">${(+r.total_cost||0).toLocaleString()}</td><td style="text-align:center">${r.rating_score?'⭐'.repeat(+r.rating_score):'-'}</td></tr>`).join('');
   const deptRows=Object.keys(byDept).map((k,i)=>`<tr style="background:${i%2===0?'#ffffff':'#F9FAFB'}!important"><td>${k}</td><td style="text-align:center">${byDept[k].count}</td><td style="text-align:right">${byDept[k].total.toLocaleString()}</td></tr>`).join('');
-
   const html=`<!DOCTYPE html><html lang="th"><head><meta charset="UTF-8"><title>รายงาน Smart Maintenance 1.0 ${mLabel} ${yLabel}</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
-body{font-family:'Sarabun',sans-serif;background:#F0F2F5;color:#1a1a1a;font-size:14px;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-.wrap{max-width:800px;margin:0 auto;background:#fff}
-.header{background:#1976D2!important;color:#fff!important;padding:20px 24px;display:flex;justify-content:space-between;align-items:flex-start;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-.header h1{font-size:20px;font-weight:700;margin-bottom:2px;color:#fff!important}
-.header p{font-size:12px;color:rgba(255,255,255,0.85)!important}
-.header-right{text-align:right;font-size:12px;color:rgba(255,255,255,0.85)!important}
-.body{padding:20px 24px}
-.section{margin-bottom:20px}
-.section-title{font-size:13px;font-weight:600;color:#757575;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #E0E0E0}
-.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:4px}
-.stat{border-radius:8px;padding:12px 14px;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-.stat-num{font-size:24px;font-weight:700;line-height:1}
-.stat-lbl{font-size:12px;margin-top:2px}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{background:#F0F2F5!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;padding:8px 10px;text-align:left;font-weight:600;color:#424242;font-size:11px}
-td{padding:8px 10px;border-bottom:0.5px solid #F0F2F5;vertical-align:middle}
-tr{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-span[style*="background"]{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-.footer{text-align:center;font-size:11px;color:#9E9E9E;padding:16px;border-top:1px solid #E0E0E0}
-.print-area{padding-bottom:80px}
-.print-btn{display:flex;align-items:center;gap:8px;margin:24px auto 0;background:#1976D2!important;color:#fff!important;border:none;border-radius:50px;padding:12px 28px;font-size:15px;font-family:'Sarabun',sans-serif;font-weight:600;cursor:pointer;width:fit-content}
-@media print{
-  *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}
-  .print-btn{display:none!important}
-  body{background:#fff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  .wrap{background:#fff!important}
-  .header{background:#1976D2!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  .stat{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  th{background:#F0F2F5!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  tr{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-  span[style*="background"]{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
-}
-</style></head><body>
-<div class="wrap print-area">
-  <div class="header">
-    <div><h1>Smart Maintenance 1.0</h1><p>ศูนย์วิจัยเพชรบุรี</p><p style="margin-top:4px">รายงานประจำเดือน ${mLabel} ${yLabel}</p></div>
-    <div class="header-right"><p>พิมพ์โดย: ${sess?.user?.full_name||''}</p><p style="margin-top:4px">วันที่: ${new Date().toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'})}</p></div>
-  </div>
+<style>*{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;color-adjust:exact!important}body{font-family:'Sarabun',sans-serif;background:#F0F2F5;color:#1a1a1a;font-size:14px}.wrap{max-width:800px;margin:0 auto;background:#fff}.header{background:#1976D2!important;color:#fff!important;padding:20px 24px;display:flex;justify-content:space-between;align-items:flex-start}.header h1{font-size:20px;font-weight:700;margin-bottom:2px;color:#fff!important}.header p{font-size:12px;color:rgba(255,255,255,0.85)!important}.header-right{text-align:right;font-size:12px;color:rgba(255,255,255,0.85)!important}.body{padding:20px 24px}.section{margin-bottom:20px}.section-title{font-size:13px;font-weight:600;color:#757575;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #E0E0E0}.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:4px}.stat{border-radius:8px;padding:12px 14px}.stat-num{font-size:24px;font-weight:700;line-height:1}.stat-lbl{font-size:12px;margin-top:2px}table{width:100%;border-collapse:collapse;font-size:12px}th{background:#F0F2F5!important;padding:8px 10px;text-align:left;font-weight:600;color:#424242;font-size:11px}td{padding:8px 10px;border-bottom:0.5px solid #F0F2F5;vertical-align:middle}.footer{text-align:center;font-size:11px;color:#9E9E9E;padding:16px;border-top:1px solid #E0E0E0}.print-btn{display:flex;align-items:center;gap:8px;margin:24px auto 0;background:#1976D2!important;color:#fff!important;border:none;border-radius:50px;padding:12px 28px;font-size:15px;font-family:'Sarabun',sans-serif;font-weight:600;cursor:pointer;width:fit-content}@media print{.print-btn{display:none!important}}</style></head><body>
+<div class="wrap">
+  <div class="header"><div><h1>Smart Maintenance 1.0</h1><p>ศูนย์วิจัยเพชรบุรี</p><p style="margin-top:4px">รายงานประจำเดือน ${mLabel} ${yLabel}</p></div><div class="header-right"><p>พิมพ์โดย: ${sess?.user?.full_name||''}</p><p style="margin-top:4px">วันที่: ${new Date().toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'})}</p></div></div>
   <div class="body">
-    ${incSum?`<div class="section"><div class="section-title">สรุปสถิติ</div><div class="stats">
-      <div class="stat" style="background:#E3F0FB!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><div class="stat-num" style="color:#1976D2">${expData.length}</div><div class="stat-lbl" style="color:#1256A0">งานทั้งหมด</div></div>
-      <div class="stat" style="background:#E8F5E9!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><div class="stat-num" style="color:#2E7D32">${done}</div><div class="stat-lbl" style="color:#1B5E20">เสร็จสิ้น</div></div>
-      <div class="stat" style="background:#FFEBEE!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><div class="stat-num" style="color:#C62828">${pend}</div><div class="stat-lbl" style="color:#B71C1C">ค้างอยู่</div></div>
-      <div class="stat" style="background:#FFF3E0!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><div class="stat-num" style="color:#E65100;font-size:18px">${totalCost.toLocaleString()}</div><div class="stat-lbl" style="color:#BF360C">ค่าใช้จ่าย (฿)</div></div>
-      ${incRating?`<div class="stat" style="background:#FFF8E1!important;grid-column:1/-1;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><div class="stat-num" style="color:#F9A825">${avgRating}</div><div class="stat-lbl" style="color:#F57F17">คะแนนเฉลี่ย (จาก 5)</div></div>`:''}
-    </div></div>`:''}
+    ${incSum?`<div class="section"><div class="section-title">สรุปสถิติ</div><div class="stats"><div class="stat" style="background:#E3F0FB!important"><div class="stat-num" style="color:#1976D2">${expData.length}</div><div class="stat-lbl" style="color:#1256A0">งานทั้งหมด</div></div><div class="stat" style="background:#E8F5E9!important"><div class="stat-num" style="color:#2E7D32">${done}</div><div class="stat-lbl" style="color:#1B5E20">เสร็จสิ้น</div></div><div class="stat" style="background:#FFEBEE!important"><div class="stat-num" style="color:#C62828">${pend}</div><div class="stat-lbl" style="color:#B71C1C">ค้างอยู่</div></div><div class="stat" style="background:#FFF3E0!important"><div class="stat-num" style="color:#E65100;font-size:18px">${totalCost.toLocaleString()}</div><div class="stat-lbl" style="color:#BF360C">ค่าใช้จ่าย (฿)</div></div>${incRating?`<div class="stat" style="background:#FFF8E1!important;grid-column:1/-1"><div class="stat-num" style="color:#F9A825">${avgRating}</div><div class="stat-lbl" style="color:#F57F17">คะแนนเฉลี่ย (จาก 5)</div></div>`:''}</div></div>`:''}
     ${incList?`<div class="section"><div class="section-title">รายการงาน (${expData.length} งาน)</div><table><thead><tr><th>เลขงาน</th><th>วันที่</th><th>ผู้แจ้ง</th><th>หน่วยงาน</th><th>หมวดหมู่</th><th>สถานะ</th><th style="text-align:right">รวม (฿)</th><th style="text-align:center">คะแนน</th></tr></thead><tbody>${listRows}</tbody></table></div>`:''}
-    ${incCost?`<div class="section"><div class="section-title">ค่าใช้จ่ายตามหน่วยงาน</div><table><thead><tr><th>หน่วยงาน</th><th style="text-align:center">จำนวนงาน</th><th style="text-align:right">รวม (฿)</th></tr></thead><tbody>${deptRows}<tr style="font-weight:700;border-top:2px solid #E0E0E0;background:#ffffff!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important"><td>รวมทั้งหมด</td><td style="text-align:center">${expData.filter(r=>r.current_status==='เสร็จสิ้น').length}</td><td style="text-align:right;color:#1976D2">${totalCost.toLocaleString()}</td></tr></tbody></table></div>`:''}
+    ${incCost?`<div class="section"><div class="section-title">ค่าใช้จ่ายตามหน่วยงาน</div><table><thead><tr><th>หน่วยงาน</th><th style="text-align:center">จำนวนงาน</th><th style="text-align:right">รวม (฿)</th></tr></thead><tbody>${deptRows}<tr style="font-weight:700;border-top:2px solid #E0E0E0;background:#ffffff!important"><td>รวมทั้งหมด</td><td style="text-align:center">${expData.filter(r=>r.current_status==='เสร็จสิ้น').length}</td><td style="text-align:right;color:#1976D2">${totalCost.toLocaleString()}</td></tr></tbody></table></div>`:''}
   </div>
   <div class="footer">Smart Maintenance 1.0 | ศูนย์วิจัยเพชรบุรี | ${sess?.user?.full_name||''}</div>
 </div>
-<button class="print-btn" onclick="window.print()">
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-  พิมพ์ / บันทึก PDF
-</button>
+<button class="print-btn" onclick="window.print()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>พิมพ์ / บันทึก PDF</button>
 </body></html>`;
   const w=window.open('','_blank');w.document.write(html);w.document.close();
   hideExportPanel();toast('เปิดรายงานสำเร็จ','ok');
@@ -1414,5 +1586,5 @@ window.addEventListener('load',()=>{
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 </body>
-<!-- v6-donut-jobcount -->
+<!-- v7-smart-banner-1-2-3 -->
 </html>
