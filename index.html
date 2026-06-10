@@ -1668,7 +1668,7 @@ async function submitEditCost(){
   $('btn-ec').disabled=true;ld('กำลังบันทึก...');
   try{
     const r=await api({
-      action:'closeRequest',
+      action:'editClosedRequest',
       request_id:$('ec-rid').value,
       repair_detail:det,
       cost_part:$('ec-p').value,
