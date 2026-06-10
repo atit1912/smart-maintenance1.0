@@ -536,6 +536,47 @@ body.dark .notif-title{color:#E0E0E0}
     </div>
   </div>
 
+
+  <!-- EDIT COST — ช่าง/Admin เท่านั้น -->
+  <div class="page" id="pg-edit-cost">
+    <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">แก้ไขรายละเอียดงาน</span></div>
+    <div class="body">
+      <div class="alert alert-info" id="ec-id"></div>
+      <div class="fg"><label class="fl">รายละเอียดการซ่อม <span class="req">*</span></label><textarea id="ec-det" class="fc" rows="3" placeholder="อธิบายวิธีซ่อม / อะไหล่ที่ใช้"></textarea></div>
+      <div class="sec">ค่าใช้จ่าย</div>
+      <div class="fg"><label class="fl">ค่าอะไหล่ (บาท)</label><input type="number" id="ec-p" class="fc" value="0" min="0" oninput="calcEditCost()"></div>
+      <div class="fg"><label class="fl">ค่าแรง (บาท)</label><input type="number" id="ec-l" class="fc" value="0" min="0" oninput="calcEditCost()"></div>
+      <div class="fg"><label class="fl">ค่าอื่นๆ (บาท)</label><input type="number" id="ec-o" class="fc" value="0" min="0" oninput="calcEditCost()"></div>
+      <div class="card"><div class="card-p">
+        <div class="crow"><span>ค่าอะไหล่</span><span id="ec-cp">0.00</span></div>
+        <div class="crow"><span>ค่าแรง</span><span id="ec-cl">0.00</span></div>
+        <div class="crow"><span>ค่าอื่นๆ</span><span id="ec-co">0.00</span></div>
+        <div class="crow tot"><span>รวม</span><span id="ec-ct" style="color:var(--blue)">0.00 บาท</span></div>
+      </div></div>
+      <div class="fg mt8"><label class="fl">หมายเหตุ</label><textarea id="ec-rem" class="fc" rows="2" placeholder="หมายเหตุ (ถ้ามี)"></textarea></div>
+      <div class="fg">
+        <label class="fl">รูปภาพหลังซ่อม</label>
+        <div class="img-area" id="ec-img-box" onclick="document.getElementById('ec-img-in').click()">
+          <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <p>แตะเพื่อเลือกรูป</p><small>JPG, PNG (ระบบ resize อัตโนมัติ)</small>
+        </div>
+        <input type="file" id="ec-img-in" accept="image/*" style="display:none" onchange="prevEditImg(event)">
+        <div id="ec-img-preview-wrap" style="display:none;position:relative;margin-top:8px">
+          <img id="ec-img-prev" class="preview-img">
+          <button onclick="removeEditImg()" style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.6);border:none;border-radius:50%;width:32px;height:32px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
+        <div id="ec-img-up" style="display:none;text-align:center;padding:10px;font-size:13px;color:var(--muted)">
+          <div style="width:20px;height:20px;border:2px solid #E0E0E0;border-top-color:var(--blue);border-radius:50%;animation:sp .65s linear infinite;margin:0 auto 6px"></div>
+          กำลังอัปโหลด...
+        </div>
+        <input type="hidden" id="ec-img">
+      </div>
+      <input type="hidden" id="ec-rid">
+      <input type="hidden" id="ec-rating">
+      <button class="btn btn-blue mt12" onclick="submitEditCost()" id="btn-ec">บันทึกการแก้ไข</button>
+    </div>
+  </div>
+
   <!-- REPORT -->
   <div class="page" id="pg-rpt">
     <div class="bar"><button class="bar-back" onclick="back()"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button><span class="bar-title">รายงาน</span><button class="bar-btn" onclick="showExportPanel()"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button></div>
@@ -753,7 +794,7 @@ function go(id,navEl){
   if(id==='pg-dash')hist=[];
   else if(hist[hist.length-1]!==id)hist.push(id);
   if(navEl){document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('on'));navEl.classList.add('on');}
-  const noNav=['pg-new','pg-det','pg-close','pg-uf','pg-set','pg-profile'];
+  const noNav=['pg-new','pg-det','pg-close','pg-edit-cost','pg-uf','pg-set','pg-profile'];
   $('bnav').style.display=noNav.includes(id)?'none':'flex';
   if(id==='pg-dash')loadDash();
   if(id==='pg-all'){initAllYear();loadAll();}
@@ -773,7 +814,7 @@ function back(){
   if(prev==='pg-dash')hist=[];
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   $(prev).classList.add('on');
-  const noNav=['pg-new','pg-det','pg-close','pg-uf','pg-set'];
+  const noNav=['pg-new','pg-det','pg-close','pg-edit-cost','pg-uf','pg-set'];
   $('bnav').style.display=noNav.includes(prev)?'none':'flex';
   if(prev==='pg-dash')loadDash();
 }
@@ -1213,6 +1254,9 @@ function renderDet(r){
   if(canAcc)act+=`<button class="btn btn-blue mb12" onclick="doAccept('${r.request_id}')">รับงาน</button>`;
   if(canStart)act+=`<button class="btn btn-orange mb12" onclick="doStart('${r.request_id}')">เริ่มดำเนินการ</button>`;
   if(canClose)act+=`<button class="btn btn-green mb12" onclick="gotoClose('${r.request_id}')">ปิดงาน</button>`;
+  // ปุ่มแก้ไขรายละเอียด — เฉพาะงานเสร็จสิ้น + ช่าง/Admin
+  const canEdit=(hasRole('Technician')||hasRole('Admin'))&&r.current_status==='เสร็จสิ้น';
+  if(canEdit)act+=`<button class="btn btn-ghost mb12" onclick="gotoEditCost('${r.request_id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> แก้ไขรายละเอียด</button>`;
   const cost=r.current_status==='เสร็จสิ้น'?`<div class="card"><div class="card-p"><div class="sec" style="margin-bottom:10px">ค่าใช้จ่าย</div><div class="crow"><span>ค่าอะไหล่</span><span>${(+r.cost_part||0).toLocaleString()} บาท</span></div><div class="crow"><span>ค่าแรง</span><span>${(+r.cost_labor||0).toLocaleString()} บาท</span></div><div class="crow"><span>ค่าอื่นๆ</span><span>${(+r.cost_other||0).toLocaleString()} บาท</span></div><div class="crow tot"><span>รวม</span><span style="color:var(--blue)">${(+r.total_cost||0).toLocaleString()} บาท</span></div></div></div>`:'';
   const canRate=r.current_status==='เสร็จสิ้น'&&r.created_by===sess.user.username&&!r.rating_score;
   const ratingHtml=canRate?`<div class="card mt12"><div class="card-p"><div class="sec" style="margin-bottom:10px">⭐ ให้คะแนนการซ่อม</div><div style="display:flex;gap:8px;justify-content:center;padding:8px 0" id="star-rating"><span onclick="setDetRating(1)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(2)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(3)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(4)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(5)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span></div><div id="det-rating-label" style="text-align:center;font-size:13px;color:var(--muted)">ยังไม่ได้ให้คะแนน</div><input type="hidden" id="det-rating-val" value="0"><input type="hidden" id="det-rating-rid" value="${r.request_id}"><button class="btn btn-orange mt12" onclick="submitRating()">ส่งคะแนน</button></div></div>`:'';
@@ -1574,6 +1618,117 @@ function showUrgHint(val){
   if(hints[val]){hint.textContent=hints[val];hint.style.display='block';const colors={'สูงมาก':'#FFEBEE','สูง':'#FFF3E0','ปานกลาง':'#FFFDE7','ต่ำ':'#E8F5E9'},textColors={'สูงมาก':'#C62828','สูง':'#E65100','ปานกลาง':'#F9A825','ต่ำ':'#2E7D32'};hint.style.background=colors[val]||'#F5F5F5';hint.style.color=textColors[val]||'#424242';}
   else hint.style.display='none';
 }
+
+/* ============================================================
+   แก้ไขรายละเอียดงานเสร็จสิ้น — ช่าง/Admin เท่านั้น
+   ============================================================ */
+function gotoEditCost(id){
+  // ดึงข้อมูลปัจจุบันของงานมาใส่ฟอร์ม
+  ld('กำลังโหลด...');
+  api({action:'getRequestById',request_id:id}).then(r=>{
+    ul();
+    if(!r.success){toast(r.message,'er');return;}
+    const d=r.data;
+    $('ec-id').textContent='แก้ไขงานเลขที่: '+id;
+    $('ec-rid').value=id;
+    $('ec-rating').value=d.rating_score||'';
+    $('ec-det').value=d.repair_detail||'';
+    $('ec-p').value=d.cost_part||0;
+    $('ec-l').value=d.cost_labor||0;
+    $('ec-o').value=d.cost_other||0;
+    $('ec-rem').value=d.remark||'';
+    calcEditCost();
+    // รูปภาพ — ถ้ามีรูปเดิมให้แสดง
+    if(d.close_image_url){
+      $('ec-img').value=d.close_image_url;
+      $('ec-img-prev').src=driveImg(d.close_image_url);
+      $('ec-img-preview-wrap').style.display='block';
+      $('ec-img-box').style.display='none';
+    } else {
+      removeEditImg();
+    }
+    go('pg-edit-cost');
+  }).catch(()=>{ul();toast('โหลดล้มเหลว','er');});
+}
+
+function calcEditCost(){
+  const p=parseFloat($('ec-p').value)||0;
+  const l=parseFloat($('ec-l').value)||0;
+  const o=parseFloat($('ec-o').value)||0;
+  $('ec-cp').textContent=p.toFixed(2);
+  $('ec-cl').textContent=l.toFixed(2);
+  $('ec-co').textContent=o.toFixed(2);
+  $('ec-ct').textContent=(p+l+o).toFixed(2)+' บาท';
+}
+
+async function submitEditCost(){
+  const det=$('ec-det').value.trim();
+  if(!det){toast('กรุณากรอกรายละเอียดการซ่อม','er');return;}
+  if($('ec-img-up').style.display!=='none'){toast('รอรูปภาพอัปโหลดเสร็จก่อน','er');return;}
+  $('btn-ec').disabled=true;ld('กำลังบันทึก...');
+  try{
+    const r=await api({
+      action:'closeRequest',
+      request_id:$('ec-rid').value,
+      repair_detail:det,
+      cost_part:$('ec-p').value,
+      cost_labor:$('ec-l').value,
+      cost_other:$('ec-o').value,
+      remark:$('ec-rem').value,
+      close_image_url:$('ec-img').value,
+      rating_score:$('ec-rating').value  // เก็บคะแนนเดิมไว้ ไม่ reset
+    });
+    if(r.success){
+      toast('แก้ไขสำเร็จ ✓','ok');
+      back(); // กลับไปหน้า Detail
+      // reload detail ด้วยข้อมูลใหม่
+      setTimeout(()=>openDet($('ec-rid').value||''),300);
+    } else {
+      toast(r.message,'er');
+    }
+  }catch(e){toast('เกิดข้อผิดพลาด','er');}
+  finally{ul();$('btn-ec').disabled=false;}
+}
+
+function prevEditImg(e){
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      const MAX=1200;let w=img.width,h=img.height;
+      if(w>MAX||h>MAX){if(w>h){h=Math.round(h*MAX/w);w=MAX;}else{w=Math.round(w*MAX/h);h=MAX;}}
+      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const resized=canvas.toDataURL('image/jpeg',0.8);
+      $('ec-img-prev').src=resized;
+      $('ec-img-preview-wrap').style.display='block';
+      $('ec-img-box').style.display='none';
+      uploadEditImg(resized,'image/jpeg',file.name||('edit_'+Date.now()+'.jpg'));
+    };
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeEditImg(){
+  $('ec-img-prev').src='';
+  $('ec-img-preview-wrap').style.display='none';
+  $('ec-img-box').style.display='block';
+  $('ec-img-in').value='';
+  $('ec-img').value='';
+}
+
+async function uploadEditImg(data,mime,name){
+  $('ec-img-up').style.display='block';
+  try{
+    const r=await api({action:'uploadImage',image_data:data.split(',')[1],mime_type:mime,file_name:name});
+    if(r.success){$('ec-img').value=r.url;toast('อัปโหลดรูปสำเร็จ','ok');}
+    else{toast('อัปโหลดล้มเหลว','er');removeEditImg();}
+  }catch(e){toast('อัปโหลดล้มเหลว','er');removeEditImg();}
+  finally{$('ec-img-up').style.display='none';}
+}
+
 window.addEventListener('load',()=>{
   setTimeout(()=>{const s=document.getElementById('splash');if(s){s.classList.add('hide');setTimeout(()=>s.remove(),500);}},2000);
   loadDarkMode();checkSess();
