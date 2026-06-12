@@ -922,6 +922,54 @@ async function submitRating(){
 }
 
 /* ============================================================
+   ข้อเสนอแนะ — แก้ไข/เพิ่มได้หลังให้คะแนนแล้ว (inline edit)
+   เห็นเฉพาะผู้แจ้ง, แก้ได้แค่ comment ไม่แก้คะแนนดาว
+   ============================================================ */
+function renderRatingCommentSection(requestId, comment, canEdit){
+  const hasComment=!!comment;
+  let html=`<div id="rc-display">`;
+  if(hasComment){
+    html+=`<div class="tl-note" style="margin-top:6px;background:var(--orange-light);border-radius:8px;padding:8px 10px;font-size:13px;white-space:pre-wrap;color:#1a1a1a">💬 ${comment}</div>`;
+  }
+  if(canEdit){
+    html+=`<button class="btn btn-ghost mt8" style="width:auto;padding:6px 14px;font-size:12px;display:inline-flex" onclick="toggleEditRatingComment(true)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      ${hasComment?'แก้ไขข้อเสนอแนะ':'+ เพิ่มข้อเสนอแนะ'}
+    </button>`;
+  }
+  html+=`</div>`;
+  if(canEdit){
+    html+=`<div id="rc-edit" style="display:none;margin-top:8px">
+      <input type="hidden" id="rc-rid" value="${requestId}">
+      <textarea id="rc-textarea" class="fc" rows="2" placeholder="เช่น ช่างซ่อมรวดเร็ว สุภาพ...">${comment||''}</textarea>
+      <div class="btn-row mt8">
+        <button class="btn btn-gray" onclick="toggleEditRatingComment(false)">ยกเลิก</button>
+        <button class="btn btn-orange" onclick="saveRatingComment()">บันทึก</button>
+      </div>
+    </div>`;
+  }
+  return html;
+}
+function toggleEditRatingComment(show){
+  const disp=$('rc-display'),edit=$('rc-edit');
+  if(!disp||!edit)return;
+  disp.style.display=show?'none':'block';
+  edit.style.display=show?'block':'none';
+  if(show)setTimeout(()=>$('rc-textarea')?.focus(),50);
+}
+async function saveRatingComment(){
+  const rid=$('rc-rid').value;
+  const comment=$('rc-textarea').value.trim();
+  ld('กำลังบันทึก...');
+  try{
+    const r=await api({action:'updateRatingComment',request_id:rid,rating_comment:comment});
+    toast(r.message,r.success?'ok':'er');
+    if(r.success)openDet(rid);
+  }catch(e){toast('เกิดข้อผิดพลาด','er');}
+  finally{ul();}
+}
+
+/* ============================================================
    ข้อ 3: loadDash + checkRatingBanner
    ============================================================ */
 async function loadDash(){
@@ -1260,6 +1308,7 @@ function renderDet(r){
   if(canEdit)act+=`<button class="btn btn-ghost mb12" onclick="gotoEditCost('${r.request_id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> แก้ไขรายละเอียด</button>`;
   const cost=r.current_status==='เสร็จสิ้น'?`<div class="card"><div class="card-p"><div class="sec" style="margin-bottom:10px">ค่าใช้จ่าย</div><div class="crow"><span>ค่าอะไหล่</span><span>${(+r.cost_part||0).toLocaleString()} บาท</span></div><div class="crow"><span>ค่าแรง</span><span>${(+r.cost_labor||0).toLocaleString()} บาท</span></div><div class="crow"><span>ค่าอื่นๆ</span><span>${(+r.cost_other||0).toLocaleString()} บาท</span></div><div class="crow tot"><span>รวม</span><span style="color:var(--blue)">${(+r.total_cost||0).toLocaleString()} บาท</span></div></div></div>`:'';
   const canRate=r.current_status==='เสร็จสิ้น'&&r.created_by===sess.user.username&&!r.rating_score;
+  const canEditRatingComment=r.current_status==='เสร็จสิ้น'&&r.created_by===sess.user.username&&!!r.rating_score;
   const ratingHtml=canRate?`<div class="card mt12"><div class="card-p"><div class="sec" style="margin-bottom:10px">⭐ ให้คะแนนการซ่อม</div><div style="display:flex;gap:8px;justify-content:center;padding:8px 0" id="star-rating"><span onclick="setDetRating(1)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(2)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(3)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(4)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(5)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span></div><div id="det-rating-label" style="text-align:center;font-size:13px;color:var(--muted)">ยังไม่ได้ให้คะแนน</div><div class="fg mt8"><label class="fl">ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</label><textarea id="det-rating-comment" class="fc" rows="2" placeholder="เช่น ช่างซ่อมรวดเร็ว สุภาพ..."></textarea></div><input type="hidden" id="det-rating-val" value="0"><input type="hidden" id="det-rating-rid" value="${r.request_id}"><button class="btn btn-orange mt12" onclick="submitRating()">ส่งคะแนน</button></div></div>`:'';
   const tlColors={'แจ้งซ่อม':'#1976D2','อนุมัติ':'#2E7D32','ไม่อนุมัติ':'#C62828','ช่างรับงาน':'#E65100','กำลังดำเนินการ':'#6A1B9A','เสร็จสิ้น':'#00695C'};
   const tlIcons={'แจ้งซ่อม':'📋','อนุมัติ':'✅','ไม่อนุมัติ':'❌','ช่างรับงาน':'👷','กำลังดำเนินการ':'🔧','เสร็จสิ้น':'🏁'};
@@ -1282,7 +1331,7 @@ function renderDet(r){
         ${t.note?`<div class="tl-note" style="margin-top:6px;background:var(--blue-light);border-radius:8px;padding:8px 10px;font-size:13px;white-space:pre-wrap;color:#1a1a1a">${t.note}</div>`:''}
         ${t.img?`<img src="${driveImg(t.img)}" class="preview-img" style="margin-top:8px" onerror="this.style.display='none'">`:''}
         ${t.rating?`<div style="margin-top:6px;font-size:13px;color:var(--orange);font-weight:600">คะแนน: ${'⭐'.repeat(+t.rating)} (${t.rating}/5)</div>`:''}
-        ${t.ratingComment?`<div class="tl-note" style="margin-top:6px;background:var(--orange-light);border-radius:8px;padding:8px 10px;font-size:13px;white-space:pre-wrap;color:#1a1a1a">💬 ${t.ratingComment}</div>`:''}
+        ${t.rating?renderRatingCommentSection(r.request_id,t.ratingComment,canEditRatingComment):''}
       </div>
     </div>`).join('');
   $('det-body').innerHTML=`
