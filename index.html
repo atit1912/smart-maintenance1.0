@@ -914,9 +914,10 @@ function setDetRating(n){
 async function submitRating(){
   const score=document.getElementById('det-rating-val').value;
   const rid=document.getElementById('det-rating-rid').value;
+  const comment=(document.getElementById('det-rating-comment')?.value||'').trim();
   if(!score||score==='0'){toast('กรุณาเลือกคะแนนก่อน','er');return;}
   ld('กำลังส่งคะแนน...');
-  try{const r=await api({action:'rateRequest',request_id:rid,rating_score:score});toast(r.message,r.success?'ok':'er');if(r.success){_ratingBannerShown=false;openDet(rid);}}
+  try{const r=await api({action:'rateRequest',request_id:rid,rating_score:score,rating_comment:comment});toast(r.message,r.success?'ok':'er');if(r.success){_ratingBannerShown=false;openDet(rid);}}
   finally{ul();}
 }
 
@@ -1259,7 +1260,7 @@ function renderDet(r){
   if(canEdit)act+=`<button class="btn btn-ghost mb12" onclick="gotoEditCost('${r.request_id}')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> แก้ไขรายละเอียด</button>`;
   const cost=r.current_status==='เสร็จสิ้น'?`<div class="card"><div class="card-p"><div class="sec" style="margin-bottom:10px">ค่าใช้จ่าย</div><div class="crow"><span>ค่าอะไหล่</span><span>${(+r.cost_part||0).toLocaleString()} บาท</span></div><div class="crow"><span>ค่าแรง</span><span>${(+r.cost_labor||0).toLocaleString()} บาท</span></div><div class="crow"><span>ค่าอื่นๆ</span><span>${(+r.cost_other||0).toLocaleString()} บาท</span></div><div class="crow tot"><span>รวม</span><span style="color:var(--blue)">${(+r.total_cost||0).toLocaleString()} บาท</span></div></div></div>`:'';
   const canRate=r.current_status==='เสร็จสิ้น'&&r.created_by===sess.user.username&&!r.rating_score;
-  const ratingHtml=canRate?`<div class="card mt12"><div class="card-p"><div class="sec" style="margin-bottom:10px">⭐ ให้คะแนนการซ่อม</div><div style="display:flex;gap:8px;justify-content:center;padding:8px 0" id="star-rating"><span onclick="setDetRating(1)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(2)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(3)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(4)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(5)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span></div><div id="det-rating-label" style="text-align:center;font-size:13px;color:var(--muted)">ยังไม่ได้ให้คะแนน</div><input type="hidden" id="det-rating-val" value="0"><input type="hidden" id="det-rating-rid" value="${r.request_id}"><button class="btn btn-orange mt12" onclick="submitRating()">ส่งคะแนน</button></div></div>`:'';
+  const ratingHtml=canRate?`<div class="card mt12"><div class="card-p"><div class="sec" style="margin-bottom:10px">⭐ ให้คะแนนการซ่อม</div><div style="display:flex;gap:8px;justify-content:center;padding:8px 0" id="star-rating"><span onclick="setDetRating(1)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(2)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(3)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(4)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span><span onclick="setDetRating(5)" style="font-size:32px;cursor:pointer;opacity:0.3">⭐</span></div><div id="det-rating-label" style="text-align:center;font-size:13px;color:var(--muted)">ยังไม่ได้ให้คะแนน</div><div class="fg mt8"><label class="fl">ข้อเสนอแนะเพิ่มเติม (ถ้ามี)</label><textarea id="det-rating-comment" class="fc" rows="2" placeholder="เช่น ช่างซ่อมรวดเร็ว สุภาพ..."></textarea></div><input type="hidden" id="det-rating-val" value="0"><input type="hidden" id="det-rating-rid" value="${r.request_id}"><button class="btn btn-orange mt12" onclick="submitRating()">ส่งคะแนน</button></div></div>`:'';
   const tlColors={'แจ้งซ่อม':'#1976D2','อนุมัติ':'#2E7D32','ไม่อนุมัติ':'#C62828','ช่างรับงาน':'#E65100','กำลังดำเนินการ':'#6A1B9A','เสร็จสิ้น':'#00695C'};
   const tlIcons={'แจ้งซ่อม':'📋','อนุมัติ':'✅','ไม่อนุมัติ':'❌','ช่างรับงาน':'👷','กำลังดำเนินการ':'🔧','เสร็จสิ้น':'🏁'};
   const tlItems=[];
@@ -1268,7 +1269,7 @@ function renderDet(r){
   if(r.rejected_by)tlItems.push({status:'ไม่อนุมัติ',by:r.rejected_by,at:r.rejected_at,note:r.remark});
   if(r.assigned_to)tlItems.push({status:'ช่างรับงาน',by:r.assigned_to,at:r.accepted_at,note:''});
   if(r.work_start_at)tlItems.push({status:'กำลังดำเนินการ',by:r.assigned_to||'',at:r.work_start_at,note:''});
-  if(r.closed_by)tlItems.push({status:'เสร็จสิ้น',by:r.closed_by,at:r.closed_at,note:r.repair_detail,img:r.close_image_url,rating:r.rating_score});
+  if(r.closed_by)tlItems.push({status:'เสร็จสิ้น',by:r.closed_by,at:r.closed_at,note:r.repair_detail,img:r.close_image_url,rating:r.rating_score,ratingComment:r.rating_comment});
   const tlHtml=tlItems.map((t,i)=>`
     <div style="display:flex;gap:12px;${i<tlItems.length-1?'margin-bottom:4px':''}">
       <div style="display:flex;flex-direction:column;align-items:center;width:36px;flex-shrink:0">
@@ -1281,6 +1282,7 @@ function renderDet(r){
         ${t.note?`<div class="tl-note" style="margin-top:6px;background:var(--blue-light);border-radius:8px;padding:8px 10px;font-size:13px;white-space:pre-wrap;color:#1a1a1a">${t.note}</div>`:''}
         ${t.img?`<img src="${driveImg(t.img)}" class="preview-img" style="margin-top:8px" onerror="this.style.display='none'">`:''}
         ${t.rating?`<div style="margin-top:6px;font-size:13px;color:var(--orange);font-weight:600">คะแนน: ${'⭐'.repeat(+t.rating)} (${t.rating}/5)</div>`:''}
+        ${t.ratingComment?`<div class="tl-note" style="margin-top:6px;background:var(--orange-light);border-radius:8px;padding:8px 10px;font-size:13px;white-space:pre-wrap;color:#1a1a1a">💬 ${t.ratingComment}</div>`:''}
       </div>
     </div>`).join('');
   $('det-body').innerHTML=`
