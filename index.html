@@ -1435,7 +1435,7 @@ async function submitReq(){
 function initMineYear(){const y=$('mine-y');if(!y||y.options.length>0)return;const cur=new Date().getFullYear();for(let i=cur;i>=cur-3;i--)y.innerHTML+=`<option value="${i}" ${i===cur?'selected':''}>${i+543}</option>`;}
 function initAllYear(){const y=$('all-y');if(y.options.length>0)return;const cur=new Date().getFullYear();for(let i=cur;i>=cur-3;i--)y.innerHTML+=`<option value="${i}" ${i===cur?'selected':''}>${i+543}</option>`;}
 function initRpt(){const y=$('rpt-y');if(!y.options.length){const cur=new Date().getFullYear();for(let i=cur;i>=cur-3;i--)y.innerHTML+=`<option value="${i}" ${i===cur?'selected':''}>${i+543}</option>`;}loadRpt();}
-let _rptBarChart=null,_rptDonutChart=null;
+let _rptBarChart=null,_rptDonutChart=null,_rptTypeChart=null,_rptCatChart=null;
 async function loadRpt(){
   ld();
   try{
@@ -1450,6 +1450,20 @@ async function loadRpt(){
       d.forEach(x=>{if(!byDeptCount[x.department])byDeptCount[x.department]={count:0};byDeptCount[x.department].count++;});
       const byDeptCost=(()=>{if(s?.by_department&&Object.keys(s.by_department).length>0)return s.by_department;const bd={};d.filter(x=>x.current_status==='เสร็จสิ้น').forEach(x=>{if(!bd[x.department])bd[x.department]={count:0,total:0};bd[x.department].count++;bd[x.department].total+=(+x.total_cost||0);});return bd;})();
       const deptKeys=Object.keys(byDeptCount);
+      // จัดกลุ่มข้อมูลตามลำดับที่กำหนดไว้ก่อน แล้วต่อท้ายด้วยค่าอื่นที่พบจริงในข้อมูลแต่ไม่อยู่ใน list (กันกรณี backend เพิ่มตัวเลือกใหม่)
+      const orderedKeys=(preferredOrder,found)=>{const extra=found.filter(k=>!preferredOrder.includes(k));return[...preferredOrder.filter(k=>found.includes(k)),...extra];};
+      const TYPE_ORDER=['งานซ่อมแซม','งานติดตั้ง','งานบำรุงรักษา'];
+      const TYPE_COLORS={'งานซ่อมแซม':'#C62828','งานติดตั้ง':'#1976D2','งานบำรุงรักษา':'#2E7D32'};
+      const CAT_ORDER=['ระบบไฟฟ้า','ระบบน้ำ','เครื่องจักรและอุปกรณ์','ก่อสร้าง','ระบบIT','บ่อและโรงเรือน','อื่นๆ'];
+      const CAT_COLORS={'ระบบไฟฟ้า':'#F9A825','ระบบน้ำ':'#0288D1','เครื่องจักรและอุปกรณ์':'#6A1B9A','ก่อสร้าง':'#E65100','ระบบIT':'#00695C','บ่อและโรงเรือน':'#2E7D32','อื่นๆ':'#757575'};
+      const FALLBACK_COLORS=['#5C6BC0','#8D6E63','#26A69A','#EC407A','#7CB342','#AB47BC','#42A5F5'];
+      const byTypeCount={};
+      d.forEach(x=>{const k=x.request_type||'ไม่ระบุ';byTypeCount[k]=(byTypeCount[k]||0)+1;});
+      const typeKeys=orderedKeys(TYPE_ORDER,Object.keys(byTypeCount));
+      const byCatCount={},byCatCost={};
+      d.forEach(x=>{const k=x.work_category||'ไม่ระบุ';byCatCount[k]=(byCatCount[k]||0)+1;});
+      d.filter(x=>x.current_status==='เสร็จสิ้น').forEach(x=>{const k=x.work_category||'ไม่ระบุ';byCatCost[k]=(byCatCost[k]||0)+(+x.total_cost||0);});
+      const catKeys=orderedKeys(CAT_ORDER,Object.keys(byCatCount));
       if(deptKeys.length>0){
         const donutVals=deptKeys.map(k=>byDeptCount[k].count);
         const totalJobs=donutVals.reduce((a,b)=>a+b,0);
@@ -1464,16 +1478,43 @@ async function loadRpt(){
             <canvas id="rpt-donut" role="img" aria-label="Donut chart department job count"></canvas>
           </div>
           <div class="sec" style="margin-bottom:8px;margin-top:4px">ค่าใช้จ่ายตามหน่วยงาน (฿)</div>
-          <div style="position:relative;width:100%;height:240px">
+          <div style="position:relative;width:100%;height:240px;margin-bottom:20px">
             <canvas id="rpt-bar" role="img" aria-label="Bar chart department cost in baht"></canvas>
+          </div>
+          <div class="sec" style="margin-bottom:12px;margin-top:4px">ประเภทการแจ้ง</div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px" id="rpt-type-legend"></div>
+          <div style="position:relative;width:100%;height:240px;margin-bottom:20px">
+            <canvas id="rpt-type-donut" role="img" aria-label="Donut chart request type"></canvas>
+          </div>
+          <div class="sec" style="margin-bottom:8px;margin-top:4px">หมวดหมู่งาน (จำนวนงาน / ค่าใช้จ่าย)</div>
+          <div style="position:relative;width:100%;height:260px">
+            <canvas id="rpt-cat-combo" role="img" aria-label="Combo chart work category count and cost"></canvas>
           </div>
         </div></div>`;
         if(_rptDonutChart){_rptDonutChart.destroy();_rptDonutChart=null;}
         if(_rptBarChart){_rptBarChart.destroy();_rptBarChart=null;}
+        if(_rptTypeChart){_rptTypeChart.destroy();_rptTypeChart=null;}
+        if(_rptCatChart){_rptCatChart.destroy();_rptCatChart=null;}
         if(typeof Chart!=='undefined'&&typeof ChartDataLabels!=='undefined'){
           Chart.register(ChartDataLabels);
           _rptDonutChart=new Chart($('rpt-donut'),{type:'doughnut',data:{labels:deptKeys,datasets:[{data:donutVals,backgroundColor:assignedColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'48%',layout:{padding:30},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const pct=Math.round(ctx.parsed/totalJobs*100);return ` ${ctx.label}: ${ctx.parsed} งาน (${pct}%)`;}}} ,datalabels:{display:true,anchor:'end',align:'end',offset:4,color:(_ctx)=>assignedColors[_ctx.dataIndex],font:{size:9,weight:'500'},textAlign:'center',formatter:(value,ctx)=>{const pct=Math.round(value/totalJobs*100);return pct+'%\n'+value+' งาน';}}}},plugins:[{id:'centerText',afterDraw(chart){const {ctx,chartArea:{left,right,top,bottom}}=chart;const cx=(left+right)/2,cy=(top+bottom)/2;ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#757575';ctx.font='10px sans-serif';ctx.fillText('รวม',cx,cy-8);ctx.fillStyle='#1976D2';ctx.font='bold 13px sans-serif';ctx.fillText(totalJobs+' งาน',cx,cy+8);ctx.restore();}}]});
           _rptBarChart=new Chart($('rpt-bar'),{type:'bar',data:{labels:deptKeys,datasets:[{data:barVals,backgroundColor:assignedColors,borderRadius:5,borderSkipped:false}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{display:false},tooltip:{callbacks:{label:ctx=>` ${ctx.parsed.y.toLocaleString()} บาท`}}},scales:{x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:45,font:{size:9},color:'#757575'}},y:{grid:{color:'rgba(0,0,0,0.06)'},title:{display:true,text:'บาท (฿)',font:{size:10},color:'#757575'},ticks:{font:{size:9},color:'#757575',callback:v=>v.toLocaleString()+'฿'}}}},plugins:[ChartDataLabels]});
+
+          // === กราฟที่ 1 เพิ่มเติม: โดนัท "ประเภทการแจ้ง" ===
+          const typeVals=typeKeys.map(k=>byTypeCount[k]||0);
+          const totalTypeJobs=typeVals.reduce((a,b)=>a+b,0);
+          const typeColors=typeKeys.map((k,i)=>TYPE_COLORS[k]||FALLBACK_COLORS[i%FALLBACK_COLORS.length]);
+          $('rpt-type-legend').innerHTML=typeKeys.map((k,i)=>`<span style="display:flex;align-items:center;gap:4px;font-size:11px;color:#424242"><span style="width:10px;height:10px;border-radius:2px;background:${typeColors[i]};flex-shrink:0"></span>${k} ${totalTypeJobs?Math.round(typeVals[i]/totalTypeJobs*100):0}%</span>`).join('');
+          _rptTypeChart=new Chart($('rpt-type-donut'),{type:'doughnut',data:{labels:typeKeys,datasets:[{data:typeVals,backgroundColor:typeColors,borderWidth:2,borderColor:'#fff',hoverOffset:6}]},options:{responsive:true,maintainAspectRatio:false,cutout:'48%',layout:{padding:30},plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>{const pct=totalTypeJobs?Math.round(ctx.parsed/totalTypeJobs*100):0;return ` ${ctx.label}: ${ctx.parsed} งาน (${pct}%)`;}}},datalabels:{display:true,anchor:'end',align:'end',offset:4,color:(_ctx)=>typeColors[_ctx.dataIndex],font:{size:9,weight:'500'},textAlign:'center',formatter:(value)=>{const pct=totalTypeJobs?Math.round(value/totalTypeJobs*100):0;return pct+'%\n'+value+' งาน';}}}},plugins:[{id:'centerText2',afterDraw(chart){const {ctx,chartArea:{left,right,top,bottom}}=chart;const cx=(left+right)/2,cy=(top+bottom)/2;ctx.save();ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#757575';ctx.font='10px sans-serif';ctx.fillText('รวม',cx,cy-8);ctx.fillStyle='#1976D2';ctx.font='bold 13px sans-serif';ctx.fillText(totalTypeJobs+' งาน',cx,cy+8);ctx.restore();}}]});
+
+          // === กราฟที่ 2 เพิ่มเติม: แท่ง+เส้น (2 แกน) "หมวดหมู่งาน" — จำนวนงาน (แท่ง, แกนซ้าย) + ค่าใช้จ่าย (เส้น, แกนขวา) ===
+          const catCounts=catKeys.map(k=>byCatCount[k]||0);
+          const catCosts=catKeys.map(k=>byCatCost[k]||0);
+          const catColors=catKeys.map((k,i)=>CAT_COLORS[k]||FALLBACK_COLORS[i%FALLBACK_COLORS.length]);
+          _rptCatChart=new Chart($('rpt-cat-combo'),{data:{labels:catKeys,datasets:[
+            {type:'bar',label:'จำนวนงาน',data:catCounts,backgroundColor:catColors,borderRadius:5,borderSkipped:false,yAxisID:'y',order:2},
+            {type:'line',label:'ค่าใช้จ่าย (฿)',data:catCosts,yAxisID:'y1',borderColor:'#C62828',backgroundColor:'#C62828',pointBackgroundColor:'#C62828',pointRadius:3,tension:.3,order:1}
+          ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{size:10},color:'#616161',boxWidth:10,padding:12}},datalabels:{display:false},tooltip:{callbacks:{label:ctx=>ctx.dataset.yAxisID==='y1'?` ${ctx.parsed.y.toLocaleString()} บาท`:` ${ctx.parsed.y.toLocaleString()} งาน`}}},scales:{x:{grid:{display:false},ticks:{autoSkip:false,maxRotation:45,font:{size:9},color:'#757575'}},y:{position:'left',beginAtZero:true,grid:{color:'rgba(0,0,0,0.06)'},title:{display:true,text:'จำนวนงาน',font:{size:10},color:'#757575'},ticks:{font:{size:9},color:'#757575',precision:0}},y1:{position:'right',beginAtZero:true,grid:{display:false},title:{display:true,text:'บาท (฿)',font:{size:10},color:'#757575'},ticks:{font:{size:9},color:'#757575',callback:v=>v.toLocaleString()+'฿'}}}}});
         }
       }
       renderList('rpt-ls',d);
