@@ -594,6 +594,10 @@ body.dark .notif-title{color:#E0E0E0}
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         </button>
       </div>
+      <div style="display:flex;gap:8px;margin-bottom:12px">
+        <select id="rpt-dept-filter" class="fc" style="flex:1" onchange="loadRpt()"><option value="">ทุกหน่วยงาน</option></select>
+        <select id="rpt-type-filter" class="fc" style="flex:1" onchange="loadRpt()"><option value="">ทุกประเภท</option></select>
+      </div>
       <div class="tabs" id="tabs-rpt">
         <button class="tab on" onclick="setTab('all',this,'tabs-rpt');loadRpt()">ทั้งหมด</button>
         <button class="tab" onclick="setTab('pending',this,'tabs-rpt');loadRpt()">ค้าง</button>
@@ -902,6 +906,8 @@ function fillMaster(){
     fillSel('r-dept','department');fillSel('uf-dp','department');
     fillSel('r-type','request_type');fillSel('r-cat','work_category');
     fillSel('r-mach','machine_status');fillSel('r-urg','urgency');
+    const rdSel=$('rpt-dept-filter');if(rdSel&&master.department)rdSel.innerHTML='<option value="">ทุกหน่วยงาน</option>'+master.department.map(m=>`<option value="${m.value}">${m.display_text||m.value}</option>`).join('');
+    const rtSel=$('rpt-type-filter');if(rtSel&&master.request_type)rtSel.innerHTML='<option value="">ทุกประเภท</option>'+master.request_type.map(m=>`<option value="${m.value}">${m.display_text||m.value}</option>`).join('');
   },50);
 }
 function setDetRating(n){
@@ -1470,14 +1476,15 @@ async function loadRpt(){
   try{
     const r=await api({action:'getReport',report_type:rptTab,month:$('rpt-m').value,year:$('rpt-y').value});
     if(r.success){
-      const d=r.data,s=r.summary;
+      const deptF=$('rpt-dept-filter')?.value||'',typeF=$('rpt-type-filter')?.value||'';
+      const d=r.data.filter(x=>(!deptF||x.department===deptF)&&(!typeF||x.request_type===typeF));
       const done=d.filter(x=>x.current_status==='เสร็จสิ้น').length;
       const pend=d.filter(x=>x.current_status!=='เสร็จสิ้น'&&x.current_status!=='ไม่อนุมัติ').length;
-      const cost=(s?.total_cost||d.reduce((a,x)=>a+(+x.total_cost||0),0));
+      const cost=d.reduce((a,x)=>a+(+x.total_cost||0),0);
       $('rpt-sum').innerHTML=`<div class="scard s0" style="cursor:default"><div class="snum">${d.length}</div><div class="slbl">ทั้งหมด</div></div><div class="scard s1" style="cursor:default"><div class="snum">${done}</div><div class="slbl">เสร็จสิ้น</div></div><div class="scard s3" style="cursor:default"><div class="snum">${pend}</div><div class="slbl">ค้างอยู่</div></div><div class="scard" style="cursor:default"><div class="snum" style="font-size:20px;color:var(--orange)">${cost.toLocaleString()}</div><div class="slbl">ค่าใช้จ่าย (฿)</div></div>`;
       const byDeptCount={};
       d.forEach(x=>{if(!byDeptCount[x.department])byDeptCount[x.department]={count:0};byDeptCount[x.department].count++;});
-      const byDeptCost=(()=>{if(s?.by_department&&Object.keys(s.by_department).length>0)return s.by_department;const bd={};d.filter(x=>x.current_status==='เสร็จสิ้น').forEach(x=>{if(!bd[x.department])bd[x.department]={count:0,total:0};bd[x.department].count++;bd[x.department].total+=(+x.total_cost||0);});return bd;})();
+      const byDeptCost=(()=>{const bd={};d.filter(x=>x.current_status==='เสร็จสิ้น').forEach(x=>{if(!bd[x.department])bd[x.department]={count:0,total:0};bd[x.department].count++;bd[x.department].total+=(+x.total_cost||0);});return bd;})();
       const deptKeys=Object.keys(byDeptCount);
       // จัดกลุ่มข้อมูลตามลำดับที่กำหนดไว้ก่อน แล้วต่อท้ายด้วยค่าอื่นที่พบจริงในข้อมูลแต่ไม่อยู่ใน list (กันกรณี backend เพิ่มตัวเลือกใหม่)
       const orderedKeys=(preferredOrder,found)=>{const extra=found.filter(k=>!preferredOrder.includes(k));return[...preferredOrder.filter(k=>found.includes(k)),...extra];};
