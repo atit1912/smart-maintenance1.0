@@ -1477,7 +1477,8 @@ async function loadRpt(){
     const r=await api({action:'getReport',report_type:rptTab,month:$('rpt-m').value,year:$('rpt-y').value});
     if(r.success){
       const deptF=$('rpt-dept-filter')?.value||'',typeF=$('rpt-type-filter')?.value||'';
-      const d=r.data.filter(x=>(!deptF||x.department===deptF)&&(!typeF||x.request_type===typeF));
+      const norm=v=>(v||'').toString().trim().toLowerCase();
+      const d=r.data.filter(x=>(!deptF||norm(x.department)===norm(deptF))&&(!typeF||norm(x.request_type)===norm(typeF)));
       const done=d.filter(x=>x.current_status==='เสร็จสิ้น').length;
       const pend=d.filter(x=>x.current_status!=='เสร็จสิ้น'&&x.current_status!=='ไม่อนุมัติ').length;
       const cost=d.reduce((a,x)=>a+(+x.total_cost||0),0);
